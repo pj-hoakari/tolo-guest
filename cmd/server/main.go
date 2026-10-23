@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/pj-hoakari/tolo-guest/internal/application"
 	connectinfra "github.com/pj-hoakari/tolo-guest/internal/infra/connect"
 	dbinfra "github.com/pj-hoakari/tolo-guest/internal/infra/db"
 	"github.com/pj-hoakari/tolo-guest/internal/infra/httpapi"
@@ -76,7 +77,10 @@ func run() error {
 		}
 	}()
 
-	serviceRoutes, err := connectinfra.RoutesWithJWTSettings(jwtSettings)
+	serviceRoutes, err := connectinfra.RoutesWithJWTSettings(
+		jwtSettings,
+		application.NewGuestSettingsService(dbinfra.NewPostgresGuestSettingsRepository(db)),
+	)
 	if err != nil {
 		return fmt.Errorf("build handler: %w", err)
 	}

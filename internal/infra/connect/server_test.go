@@ -67,7 +67,7 @@ func newTestVerifier(t *testing.T, keys internaljwt.JWKS) *verifier.Verifier {
 func newTestHandler(t *testing.T, keys internaljwt.JWKS) http.Handler {
 	t.Helper()
 
-	routes, err := RoutesWithVerifier(newTestVerifier(t, keys))
+	routes, err := RoutesWithVerifier(newTestVerifier(t, keys), newGuestSettingsUseCases())
 	if err != nil {
 		t.Fatalf("RoutesWithVerifier() error = %v", err)
 	}
@@ -96,7 +96,7 @@ func newTestHandlerForJWKSURL(t *testing.T, jwksURL string) http.Handler {
 		t.Fatalf("create internal JWT verifier: %v", err)
 	}
 
-	routes, err := RoutesWithVerifier(tokenVerifier)
+	routes, err := RoutesWithVerifier(tokenVerifier, newGuestSettingsUseCases())
 	if err != nil {
 		t.Fatalf("RoutesWithVerifier() error = %v", err)
 	}
@@ -189,7 +189,7 @@ func TestRoutesWithJWTSettings(t *testing.T) {
 		settings := DefaultJWTSettings()
 		settings.JWKSURL = newTestJWKSURL(t, keys)
 
-		routes, err := RoutesWithJWTSettings(settings)
+		routes, err := RoutesWithJWTSettings(settings, newGuestSettingsUseCases())
 		if err != nil {
 			t.Fatalf("RoutesWithJWTSettings() error = %v", err)
 		}
@@ -197,9 +197,8 @@ func TestRoutesWithJWTSettings(t *testing.T) {
 		mux := http.NewServeMux()
 		routes(mux)
 
-		err = getGuestSettings(newTestServer(t, mux), authorization)
-		if got, want := connectrpc.CodeOf(err), connectrpc.CodeUnimplemented; got != want {
-			t.Fatalf("GetGuestSettings() error code = %v, want %v", got, want)
+		if err := getGuestSettings(newTestServer(t, mux), authorization); err != nil {
+			t.Fatalf("GetGuestSettings() error = %v", err)
 		}
 	})
 
@@ -209,7 +208,7 @@ func TestRoutesWithJWTSettings(t *testing.T) {
 		settings := DefaultJWTSettings()
 		settings.JWKSURL = ""
 
-		_, err := RoutesWithJWTSettings(settings)
+		_, err := RoutesWithJWTSettings(settings, newGuestSettingsUseCases())
 		if !errors.Is(err, jwks.ErrMissingURL) {
 			t.Fatalf("RoutesWithJWTSettings() error = %v, want %v", err, jwks.ErrMissingURL)
 		}
@@ -227,12 +226,21 @@ func TestEventAccessAuthz(t *testing.T) {
 		Scope:          "events.read",
 	}
 
+	t.Run("accepts an event token with the required scope", func(t *testing.T) {
+		t.Parallel()
+
+		authorization, keys := mintInternalJWTFor(t, eventToken)
+
+		if err := getGuestSettings(newTestServer(t, newTestHandler(t, keys)), authorization); err != nil {
+			t.Fatalf("GetGuestSettings() error = %v", err)
+		}
+	})
+
 	tests := []struct {
 		name   string
 		config func(jwtgen.Config) jwtgen.Config
 		want   connectrpc.Code
 	}{
-		{"accepts an event token with the required scope", func(c jwtgen.Config) jwtgen.Config { return c }, connectrpc.CodeUnimplemented},
 		{"rejects an event token without the required scope", func(c jwtgen.Config) jwtgen.Config {
 			c.Scope = "events.manage"
 

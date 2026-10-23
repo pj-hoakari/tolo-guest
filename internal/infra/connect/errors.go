@@ -6,10 +6,39 @@ import (
 	"log/slog"
 
 	connectrpc "connectrpc.com/connect/v2"
+
+	"github.com/pj-hoakari/tolo-guest/internal/domain"
+	"github.com/pj-hoakari/tolo-guest/internal/tenantctx"
 )
 
 // errInternal is the only detail a client learns about an internal failure.
 var errInternal = errors.New("internal error")
+
+var clientErrors = []struct {
+	target  error
+	code    connectrpc.Code
+	message string
+}{
+	{domain.ErrKindRequired, connectrpc.CodeInvalidArgument, "page composition kind is required"},
+	{domain.ErrDuplicateKind, connectrpc.CodeInvalidArgument, "page composition kind is duplicated"},
+	{domain.ErrComponentUnspecified, connectrpc.CodeInvalidArgument, "page composition component is unspecified"},
+	{domain.ErrComponentsRequired, connectrpc.CodeInvalidArgument, "page composition components are required"},
+	{domain.ErrDuplicateComponent, connectrpc.CodeInvalidArgument, "page composition component is duplicated"},
+	{tenantctx.ErrMissing, connectrpc.CodePermissionDenied, "tenant ID is missing from the token"},
+	{tenantctx.ErrMismatch, connectrpc.CodePermissionDenied, "tenant ID does not match the token"},
+	{tenantctx.ErrEventMissing, connectrpc.CodePermissionDenied, "event ID is missing from the token"},
+	{tenantctx.ErrEventMismatch, connectrpc.CodePermissionDenied, "event ID does not match the token"},
+}
+
+func connectError(ctx context.Context, err error) *connectrpc.Error {
+	for _, candidate := range clientErrors {
+		if errors.Is(err, candidate.target) {
+			return connectrpc.NewError(candidate.code, candidate.message).WithCause(err)
+		}
+	}
+
+	return InternalError(ctx, err)
+}
 
 // InternalError reports a failure the client can do nothing about. The cause is
 // written to the server log and replaced by a fixed message, so that no
