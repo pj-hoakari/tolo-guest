@@ -25,6 +25,7 @@ type memoryReadModel struct {
 	statuses map[string]domain.GuestStatus
 	names    map[string]domain.DisplayNames
 	messages map[string][]domain.GuestMessage
+	qr       map[string]domain.QrLocations
 }
 
 func newMemoryReadModel() *memoryReadModel {
@@ -32,11 +33,12 @@ func newMemoryReadModel() *memoryReadModel {
 		statuses: map[string]domain.GuestStatus{},
 		names:    map[string]domain.DisplayNames{},
 		messages: map[string][]domain.GuestMessage{},
+		qr:       map[string]domain.QrLocations{},
 	}
 }
 
 func newGuestPageUseCases(readModel *memoryReadModel) *application.GuestReadModelService {
-	return application.NewGuestReadModelService(readModel, &memoryGuestSettings{byEvent: map[string]domain.GuestSettings{}}, nil, nil, nil)
+	return application.NewGuestReadModelService(readModel, &memoryGuestSettings{byEvent: map[string]domain.GuestSettings{}}, nil, nil, nil, nil)
 }
 
 func (m *memoryReadModel) ApplyStatus(_ context.Context, status domain.GuestStatus) error {
@@ -99,6 +101,27 @@ func (m *memoryReadModel) FindDisplayNames(_ context.Context, eventID string) (d
 	}
 
 	return names, nil
+}
+
+func (m *memoryReadModel) SaveQrLocations(_ context.Context, locations domain.QrLocations) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.qr[locations.EventID] = locations
+
+	return nil
+}
+
+func (m *memoryReadModel) FindQrLocations(_ context.Context, eventID string) (domain.QrLocations, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	locations, ok := m.qr[eventID]
+	if !ok {
+		return domain.QrLocations{}, repository.ErrQrLocationsNotFound
+	}
+
+	return locations, nil
 }
 
 func newGuestPageClient(t *testing.T) guestv1connect.GuestPageServiceClient {

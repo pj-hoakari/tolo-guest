@@ -10,6 +10,7 @@ import (
 var (
 	ErrGuestStatusNotFound  = errors.New("guest status not found")
 	ErrDisplayNamesNotFound = errors.New("display names not found")
+	ErrQrLocationsNotFound  = errors.New("QR locations not found")
 )
 
 type GuestReadModelRepository interface {
@@ -21,4 +22,6 @@ type GuestReadModelRepository interface {
 	ListMessages(ctx context.Context, eventID string) ([]domain.GuestMessage, error)
 	SaveDisplayNames(ctx context.Context, names domain.DisplayNames) error
 	FindDisplayNames(ctx context.Context, eventID string) (domain.DisplayNames, error)
+	SaveQrLocations(ctx context.Context, locations domain.QrLocations) error
+	FindQrLocations(ctx context.Context, eventID string) (domain.QrLocations, error)
 }

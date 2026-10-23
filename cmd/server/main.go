@@ -105,12 +105,15 @@ func run() error {
 
 	guestSettings := dbinfra.NewPostgresGuestSettingsRepository(db)
 	upstream := &http.Client{Timeout: upstreamTimeout}
+	graphAuthoring := connectinfra.NewGraphAuthoringClient(upstream, graphAuthoringURL)
+	readModelRepository := dbinfra.NewPostgresGuestReadModelRepository(db)
 	readModel := application.NewGuestReadModelService(
-		dbinfra.NewPostgresGuestReadModelRepository(db),
+		readModelRepository,
 		guestSettings,
 		connectinfra.NewObservationClient(upstream, observationURL),
 		connectinfra.NewOperationClient(upstream, operationURL),
-		connectinfra.NewGraphAuthoringClient(upstream, graphAuthoringURL),
+		graphAuthoring,
+		graphAuthoring,
 	)
 
 	reconcileCtx, stopReconcile := context.WithCancel(ctx)
@@ -129,7 +132,7 @@ func run() error {
 
 	serviceRoutes, err := connectinfra.RoutesWithJWTSettings(
 		jwtSettings,
-		application.NewGuestSettingsService(guestSettings),
+		application.NewGuestSettingsService(guestSettings, readModelRepository),
 		readModel,
 	)
 	if err != nil {

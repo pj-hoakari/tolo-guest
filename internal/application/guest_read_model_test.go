@@ -10,6 +10,7 @@ import (
 
 	"github.com/pj-hoakari/tolo-guest/internal/application"
 	"github.com/pj-hoakari/tolo-guest/internal/domain"
+	"github.com/pj-hoakari/tolo-guest/internal/repository"
 )
 
 type readModelMocks struct {
@@ -18,6 +19,7 @@ type readModelMocks struct {
 	statuses  *MockGuestStatusSource
 	messages  *MockGuestMessageSource
 	names     *MockDisplayNameSource
+	qr        *MockQrLocationSource
 }
 
 func newGuestReadModelService(t *testing.T) (*application.GuestReadModelService, readModelMocks) {
@@ -30,10 +32,11 @@ func newGuestReadModelService(t *testing.T) (*application.GuestReadModelService,
 		statuses:  NewMockGuestStatusSource(ctrl),
 		messages:  NewMockGuestMessageSource(ctrl),
 		names:     NewMockDisplayNameSource(ctrl),
+		qr:        NewMockQrLocationSource(ctrl),
 	}
 
 	return application.NewGuestReadModelService(
-		mocks.readModel, mocks.settings, mocks.statuses, mocks.messages, mocks.names,
+		mocks.readModel, mocks.settings, mocks.statuses, mocks.messages, mocks.names, mocks.qr,
 	), mocks
 }
 
@@ -100,6 +103,11 @@ func TestReconcile(t *testing.T) {
 		mocks.names.EXPECT().GetDisplayNames(gomock.Any(), otherEventPublicID).Return(domain.DisplayNames{}, false, nil)
 		mocks.readModel.EXPECT().SaveDisplayNames(gomock.Any(), names).Return(nil)
 
+		locations := domain.QrLocations{EventID: testEventPublicID, RevisionID: "rev-1", Locations: nil}
+		mocks.readModel.EXPECT().FindQrLocations(gomock.Any(), testEventPublicID).Return(domain.QrLocations{}, repository.ErrQrLocationsNotFound)
+		mocks.qr.EXPECT().GetQrLocations(gomock.Any(), testTenantPublicID, testEventPublicID, "rev-1").Return(locations, true, nil)
+		mocks.readModel.EXPECT().SaveQrLocations(gomock.Any(), locations).Return(nil)
+
 		mocks.messages.EXPECT().ListGuestMessages(gomock.Any(), testTenantPublicID, testEventPublicID).Return(messages, nil)
 		mocks.readModel.EXPECT().ReplaceMessages(gomock.Any(), testEventPublicID, messages).Return(nil)
 
@@ -139,6 +147,116 @@ func TestReconcile(t *testing.T) {
 		mocks.readModel.EXPECT().ApplyStatus(gomock.Any(), snapshot).Return(nil)
 		mocks.names.EXPECT().GetDisplayNames(gomock.Any(), testEventPublicID).Return(domain.DisplayNames{}, false, unavailable)
 		mocks.names.EXPECT().GetDisplayNames(gomock.Any(), otherEventPublicID).Return(domain.DisplayNames{}, false, nil)
+
+		if err := service.Reconcile(context.Background()); !errors.Is(err, unavailable) {
+			t.Errorf("Reconcile() error = %v, want %v", err, unavailable)
+		}
+	})
+}
+
+func TestReconcileQrLocations(t *testing.T) {
+	t.Parallel()
+
+	stored := domain.QrLocations{
+		EventID:    testEventPublicID,
+		RevisionID: "rev-1",
+		Locations:  []domain.QrLocation{{QrLocationID: "qr-east", Name: "東門", Kind: "entrance"}},
+	}
+	pulled := domain.QrLocations{
+		EventID:    testEventPublicID,
+		RevisionID: "rev-2",
+		Locations:  []domain.QrLocation{{QrLocationID: "qr-west", Name: "西門", Kind: "entrance"}},
+	}
+
+	publishedAt := func(t *testing.T, revisionID string, tenants []domain.EventTenant) (*application.GuestReadModelService, readModelMocks) {
+		t.Helper()
+
+		service, mocks := newGuestReadModelService(t)
+		names := domain.DisplayNames{EventID: testEventPublicID, RevisionID: revisionID, Points: nil, Routes: nil, RouteEndpoints: nil}
+
+		mocks.readModel.EXPECT().ListEventIDs(gomock.Any()).Return([]string{testEventPublicID}, nil)
+		mocks.settings.EXPECT().ListEventTenants(gomock.Any()).Return(tenants, nil)
+		mocks.statuses.EXPECT().GetGuestSnapshot(gomock.Any(), testEventPublicID).Return(domain.GuestStatus{}, false, nil)
+		mocks.names.EXPECT().GetDisplayNames(gomock.Any(), testEventPublicID).Return(names, true, nil)
+		mocks.readModel.EXPECT().SaveDisplayNames(gomock.Any(), names).Return(nil)
+
+		for _, tenant := range tenants {
+			mocks.messages.EXPECT().ListGuestMessages(gomock.Any(), tenant.TenantPublicID, tenant.EventID).Return(nil, nil)
+			mocks.readModel.EXPECT().ReplaceMessages(gomock.Any(), tenant.EventID, nil).Return(nil)
+		}
+
+		return service, mocks
+	}
+
+	withTenant := []domain.EventTenant{{EventID: testEventPublicID, TenantPublicID: testTenantPublicID}}
+
+	t.Run("pulls the QR locations of the published revision when none are stored", func(t *testing.T) {
+		t.Parallel()
+
+		service, mocks := publishedAt(t, "rev-2", withTenant)
+		mocks.readModel.EXPECT().FindQrLocations(gomock.Any(), testEventPublicID).Return(domain.QrLocations{}, repository.ErrQrLocationsNotFound)
+		mocks.qr.EXPECT().GetQrLocations(gomock.Any(), testTenantPublicID, testEventPublicID, "rev-2").Return(pulled, true, nil)
+		mocks.readModel.EXPECT().SaveQrLocations(gomock.Any(), pulled).Return(nil)
+
+		if err := service.Reconcile(context.Background()); err != nil {
+			t.Errorf("Reconcile() error = %v", err)
+		}
+	})
+
+	t.Run("pulls the QR locations again when the published revision changes", func(t *testing.T) {
+		t.Parallel()
+
+		service, mocks := publishedAt(t, "rev-2", withTenant)
+		mocks.readModel.EXPECT().FindQrLocations(gomock.Any(), testEventPublicID).Return(stored, nil)
+		mocks.qr.EXPECT().GetQrLocations(gomock.Any(), testTenantPublicID, testEventPublicID, "rev-2").Return(pulled, true, nil)
+		mocks.readModel.EXPECT().SaveQrLocations(gomock.Any(), pulled).Return(nil)
+
+		if err := service.Reconcile(context.Background()); err != nil {
+			t.Errorf("Reconcile() error = %v", err)
+		}
+	})
+
+	t.Run("does not pull the QR locations while the published revision stays the same", func(t *testing.T) {
+		t.Parallel()
+
+		service, mocks := publishedAt(t, "rev-1", withTenant)
+		mocks.readModel.EXPECT().FindQrLocations(gomock.Any(), testEventPublicID).Return(stored, nil)
+
+		if err := service.Reconcile(context.Background()); err != nil {
+			t.Errorf("Reconcile() error = %v", err)
+		}
+	})
+
+	t.Run("does not pull the QR locations of an event whose tenant is unknown", func(t *testing.T) {
+		t.Parallel()
+
+		service, _ := publishedAt(t, "rev-2", nil)
+
+		if err := service.Reconcile(context.Background()); err != nil {
+			t.Errorf("Reconcile() error = %v", err)
+		}
+	})
+
+	t.Run("keeps the previous QR locations when the revision is no longer published", func(t *testing.T) {
+		t.Parallel()
+
+		service, mocks := publishedAt(t, "rev-2", withTenant)
+		mocks.readModel.EXPECT().FindQrLocations(gomock.Any(), testEventPublicID).Return(stored, nil)
+		mocks.qr.EXPECT().GetQrLocations(gomock.Any(), testTenantPublicID, testEventPublicID, "rev-2").Return(domain.QrLocations{}, false, nil)
+
+		if err := service.Reconcile(context.Background()); err != nil {
+			t.Errorf("Reconcile() error = %v", err)
+		}
+	})
+
+	t.Run("reports a failed pull and keeps the previous QR locations", func(t *testing.T) {
+		t.Parallel()
+
+		service, mocks := publishedAt(t, "rev-2", withTenant)
+		unavailable := errors.New("graph authoring unavailable")
+
+		mocks.readModel.EXPECT().FindQrLocations(gomock.Any(), testEventPublicID).Return(stored, nil)
+		mocks.qr.EXPECT().GetQrLocations(gomock.Any(), testTenantPublicID, testEventPublicID, "rev-2").Return(domain.QrLocations{}, false, unavailable)
 
 		if err := service.Reconcile(context.Background()); !errors.Is(err, unavailable) {
 			t.Errorf("Reconcile() error = %v, want %v", err, unavailable)

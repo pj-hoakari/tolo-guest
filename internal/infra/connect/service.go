@@ -167,6 +167,23 @@ func (s *GuestSettingsService) UpdateGuestSettings(
 	return newProtoGuestSettings(settings), nil
 }
 
+func (s *GuestSettingsService) ListIssuedUrls(
+	ctx context.Context,
+	req *guestv1.ListIssuedUrlsRequest,
+) (*guestv1.ListIssuedUrlsResponse, error) {
+	issued, err := s.useCases.ListIssuedURLs(ctx, req.GetEventId())
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+
+	urls := make([]*guestv1.IssuedUrl, 0, len(issued))
+	for _, u := range issued {
+		urls = append(urls, &guestv1.IssuedUrl{QrLocationId: u.QrLocationID, Name: u.Name, Kind: u.Kind, Path: u.Path})
+	}
+
+	return &guestv1.ListIssuedUrlsResponse{IssuedUrls: urls}, nil
+}
+
 func newProtoGuestSettings(settings domain.GuestSettings) *guestv1.GuestSettings {
 	compositions := make([]*guestv1.PageComposition, 0, len(settings.PageCompositions))
 

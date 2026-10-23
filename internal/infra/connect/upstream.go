@@ -189,3 +189,34 @@ func (c *GraphAuthoringClient) GetDisplayNames(ctx context.Context, eventID stri
 		RouteEndpoints: endpoints,
 	}, true, nil
 }
+
+func (c *GraphAuthoringClient) GetQrLocations(
+	ctx context.Context,
+	tenantPublicID, eventID, revisionID string,
+) (domain.QrLocations, bool, error) {
+	res, err := c.client.GetQrLocations(ctx, &graphv1.GetQrLocationsRequest{
+		EventId:    eventID,
+		RevisionId: revisionID,
+		TenantId:   tenantPublicID,
+	})
+	if connectrpc.CodeOf(err) == connectrpc.CodeNotFound {
+		var none domain.QrLocations
+
+		return none, false, nil
+	}
+
+	if err != nil {
+		return domain.QrLocations{}, false, fmt.Errorf("call GetQrLocations: %w", err)
+	}
+
+	locations := make([]domain.QrLocation, 0, len(res.GetQrLocations()))
+	for _, location := range res.GetQrLocations() {
+		locations = append(locations, domain.QrLocation{
+			QrLocationID: location.GetQrLocationId(),
+			Name:         location.GetName(),
+			Kind:         location.GetKind(),
+		})
+	}
+
+	return domain.QrLocations{EventID: eventID, RevisionID: revisionID, Locations: locations}, true, nil
+}

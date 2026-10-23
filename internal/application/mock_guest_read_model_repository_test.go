@@ -84,6 +84,21 @@ func (mr *MockGuestReadModelRepositoryMockRecorder) FindDisplayNames(ctx, eventI
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindDisplayNames", reflect.TypeOf((*MockGuestReadModelRepository)(nil).FindDisplayNames), ctx, eventID)
 }
 
+// FindQrLocations mocks base method.
+func (m *MockGuestReadModelRepository) FindQrLocations(ctx context.Context, eventID string) (domain.QrLocations, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindQrLocations", ctx, eventID)
+	ret0, _ := ret[0].(domain.QrLocations)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindQrLocations indicates an expected call of FindQrLocations.
+func (mr *MockGuestReadModelRepositoryMockRecorder) FindQrLocations(ctx, eventID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindQrLocations", reflect.TypeOf((*MockGuestReadModelRepository)(nil).FindQrLocations), ctx, eventID)
+}
+
 // FindStatus mocks base method.
 func (m *MockGuestReadModelRepository) FindStatus(ctx context.Context, eventID string) (domain.GuestStatus, error) {
 	m.ctrl.T.Helper()
@@ -155,4 +170,18 @@ func (m *MockGuestReadModelRepository) SaveDisplayNames(ctx context.Context, nam
 func (mr *MockGuestReadModelRepositoryMockRecorder) SaveDisplayNames(ctx, names any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveDisplayNames", reflect.TypeOf((*MockGuestReadModelRepository)(nil).SaveDisplayNames), ctx, names)
+}
+
+// SaveQrLocations mocks base method.
+func (m *MockGuestReadModelRepository) SaveQrLocations(ctx context.Context, locations domain.QrLocations) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveQrLocations", ctx, locations)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveQrLocations indicates an expected call of SaveQrLocations.
+func (mr *MockGuestReadModelRepositoryMockRecorder) SaveQrLocations(ctx, locations any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveQrLocations", reflect.TypeOf((*MockGuestReadModelRepository)(nil).SaveQrLocations), ctx, locations)
 }

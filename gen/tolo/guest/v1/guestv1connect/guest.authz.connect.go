@@ -18,4 +18,5 @@ var GuestPageServicePolicies = authz.Policies{
 var GuestSettingsServicePolicies = authz.Policies{
 	GuestSettingsServiceGetGuestSettingsProcedure:    {Level: authz.LevelAuthenticated, RequiredScopes: []string{"events.read"}, TokenUses: []string{"event_access"}},
 	GuestSettingsServiceUpdateGuestSettingsProcedure: {Level: authz.LevelAuthenticated, RequiredScopes: []string{"events.manage"}, TokenUses: []string{"event_access"}},
+	GuestSettingsServiceListIssuedUrlsProcedure:      {Level: authz.LevelAuthenticated, RequiredScopes: []string{"events.read"}, TokenUses: []string{"event_access"}},
 }
