@@ -115,8 +115,8 @@ github.com/pj-hoakari/protoc-gen-authz-go v0.3.0 h1:oLKiB3M/JaFROsHR7NHU0+kN6IZz
 github.com/pj-hoakari/protoc-gen-authz-go v0.3.0/go.mod h1:wrZQc2mY9d2WXSt/7P3+4Fp5yesNuQPCrEWqt6UGPqI=
 github.com/pj-hoakari/tolo-kernel-proto v0.4.0 h1:yEO6kFq3HubbZRXv9Ed2sIG7VGRm8WZ7O4tlwFROMDU=
 github.com/pj-hoakari/tolo-kernel-proto v0.4.0/go.mod h1:dH46KE1uBX0a+aL4VYDFYvdkuNPTmbFWcB6B/xjvekQ=
-github.com/pj-hoakari/tolo-observation v0.3.0-rc.0.20261023124504-b6d1392d562c h1:sNHSd/PeqZesTuLD31q2UkogryWDqR9p3NE+lPm9glY=
-github.com/pj-hoakari/tolo-observation v0.3.0-rc.0.20261023124504-b6d1392d562c/go.mod h1:K6/cbfHwJgnuMOCD843piAuDE5tB6HiU/mp9YTeO/5M=
+github.com/pj-hoakari/tolo-observation v0.4.0-rc h1:jFoZTMEoqmXTGQ+tusZUz9LmVhxiK8BDTxDCURkVjTA=
+github.com/pj-hoakari/tolo-observation v0.4.0-rc/go.mod h1:K6/cbfHwJgnuMOCD843piAuDE5tB6HiU/mp9YTeO/5M=
 github.com/pj-hoakari/tolo-operation v0.1.0-dev.0.20261023124529-995cc4b92188 h1:tFTrVgjhkwMdbqBbsuCnW+Vygi0sRH7Bi9xe2Ormv9w=
 github.com/pj-hoakari/tolo-operation v0.1.0-dev.0.20261023124529-995cc4b92188/go.mod h1:14ih0VGWlW63Bp9kD6O9X2t+8rRqA7V87H4fqMHlHvE=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
