@@ -53,6 +53,7 @@ func DefaultJWTSettings() JWTSettings {
 func RoutesWithJWTSettings(
 	settings JWTSettings,
 	guestSettings application.GuestSettingsUseCases,
+	guestPage application.GuestPageUseCases,
 ) (func(mux *http.ServeMux), error) {
 	cache, err := jwks.New(jwks.Config{
 		URL:             settings.JWKSURL,
@@ -73,7 +74,7 @@ func RoutesWithJWTSettings(
 		return nil, fmt.Errorf("create internal JWT verifier: %w", err)
 	}
 
-	return RoutesWithVerifier(tokenVerifier, guestSettings)
+	return RoutesWithVerifier(tokenVerifier, guestSettings, guestPage)
 }
 
 // RoutesWithVerifier builds the service routes around a verifier of the
@@ -82,6 +83,7 @@ func RoutesWithJWTSettings(
 func RoutesWithVerifier(
 	tokenVerifier interceptor.TokenVerifier,
 	guestSettings application.GuestSettingsUseCases,
+	guestPage application.GuestPageUseCases,
 ) (func(mux *http.ServeMux), error) {
 	// The caller sits behind the Service Gateway, so an incoming trace context is
 	// trusted and continued instead of being demoted to a span link.
@@ -111,7 +113,7 @@ func RoutesWithVerifier(
 	// Tracing runs before authentication, so a rejected call is still recorded
 	// on the trace it belongs to.
 	server := connectrpc.NewServer(tracing, auth)
-	guestv1connect.RegisterGuestPageServiceHandler(server, NewGuestPageService())
+	guestv1connect.RegisterGuestPageServiceHandler(server, NewGuestPageService(guestPage))
 	guestv1connect.RegisterGuestSettingsServiceHandler(server, NewGuestSettingsService(guestSettings))
 
 	return func(mux *http.ServeMux) {

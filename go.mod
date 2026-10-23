@@ -20,6 +20,7 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/pj-hoakari/internal-jwt-handling v0.4.0
 	github.com/pj-hoakari/protoc-gen-authz-go v0.3.0
+	github.com/pj-hoakari/tolo-graph-authoring v0.3.0-rc
 	github.com/pj-hoakari/tolo-observation v0.4.0-rc
 	github.com/pj-hoakari/tolo-operation v0.2.0-dev
 	github.com/testcontainers/testcontainers-go v0.44.0

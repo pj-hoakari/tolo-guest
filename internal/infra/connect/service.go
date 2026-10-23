@@ -2,6 +2,9 @@ package connect
 
 import (
 	"context"
+	"time"
+
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	guestv1 "github.com/pj-hoakari/tolo-guest/gen/tolo/guest/v1"
 	"github.com/pj-hoakari/tolo-guest/gen/tolo/guest/v1/guestv1connect"
@@ -15,14 +18,102 @@ var protoComponents = map[domain.Component]guestv1.GuestComponent{
 	domain.ComponentStaffMessages: guestv1.GuestComponent_GUEST_COMPONENT_STAFF_MESSAGES,
 }
 
-type GuestPageService struct {
-	guestv1connect.UnimplementedGuestPageServiceHandler
+var protoCrowdLevels = map[domain.CrowdLevel]guestv1.CrowdLevel{
+	domain.CrowdLevelUnspecified: guestv1.CrowdLevel_CROWD_LEVEL_UNSPECIFIED,
+	domain.CrowdLevelLow:         guestv1.CrowdLevel_CROWD_LEVEL_LOW,
+	domain.CrowdLevelMid:         guestv1.CrowdLevel_CROWD_LEVEL_MID,
+	domain.CrowdLevelHigh:        guestv1.CrowdLevel_CROWD_LEVEL_HIGH,
 }
 
-func NewGuestPageService() *GuestPageService {
+type GuestPageService struct {
+	guestv1connect.UnimplementedGuestPageServiceHandler
+
+	useCases application.GuestPageUseCases
+}
+
+func NewGuestPageService(useCases application.GuestPageUseCases) *GuestPageService {
 	return &GuestPageService{
 		UnimplementedGuestPageServiceHandler: guestv1connect.UnimplementedGuestPageServiceHandler{},
+		useCases:                             useCases,
 	}
+}
+
+func (s *GuestPageService) GetCrowd(ctx context.Context, req *guestv1.GetCrowdRequest) (*guestv1.GetCrowdResponse, error) {
+	view, err := s.useCases.GetCrowd(ctx, req.GetEventId(), req.GetLanguage())
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+
+	crowd := make([]*guestv1.Crowd, 0, len(view.Crowd))
+	for _, c := range view.Crowd {
+		entry := &guestv1.Crowd{Target: nil, DisplayName: c.DisplayName, Level: protoCrowdLevels[c.Level], Danger: c.Danger}
+
+		switch c.Target.Kind {
+		case domain.CrowdTargetPoint:
+			entry.Target = &guestv1.Crowd_PointId{PointId: c.Target.ID}
+		case domain.CrowdTargetRoute:
+			entry.Target = &guestv1.Crowd_RouteId{RouteId: c.Target.ID}
+		case domain.CrowdTargetUnspecified:
+		}
+
+		crowd = append(crowd, entry)
+	}
+
+	return &guestv1.GetCrowdResponse{TakenAt: protoTakenAt(view.TakenAt), Crowd: crowd}, nil
+}
+
+func (s *GuestPageService) GetQueues(ctx context.Context, req *guestv1.GetQueuesRequest) (*guestv1.GetQueuesResponse, error) {
+	view, err := s.useCases.GetQueues(ctx, req.GetEventId(), req.GetLanguage())
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+
+	queues := make([]*guestv1.Queue, 0, len(view.Queues))
+	for _, q := range view.Queues {
+		gates := make([]*guestv1.QueueGate, 0, len(q.Gates))
+		for _, g := range q.Gates {
+			gates = append(gates, &guestv1.QueueGate{PointId: g.PointID, DisplayName: g.DisplayName, Recommended: g.Recommended})
+		}
+
+		queues = append(queues, &guestv1.Queue{
+			QueueId:         q.QueueID,
+			DisplayName:     q.DisplayName,
+			WaitTimeMinutes: q.WaitTimeMinutes,
+			TurnaroundCount: q.TurnaroundCount,
+			Gates:           gates,
+		})
+	}
+
+	return &guestv1.GetQueuesResponse{TakenAt: protoTakenAt(view.TakenAt), Queues: queues}, nil
+}
+
+func (s *GuestPageService) ListGuestMessages(
+	ctx context.Context,
+	req *guestv1.ListGuestMessagesRequest,
+) (*guestv1.ListGuestMessagesResponse, error) {
+	messages, err := s.useCases.ListGuestMessages(ctx, req.GetEventId())
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+
+	protoMessages := make([]*guestv1.GuestMessage, 0, len(messages))
+	for _, m := range messages {
+		protoMessages = append(protoMessages, &guestv1.GuestMessage{
+			MessageId: m.MessageID,
+			Body:      m.Body,
+			SentAt:    timestamppb.New(m.SentAt),
+		})
+	}
+
+	return &guestv1.ListGuestMessagesResponse{Messages: protoMessages}, nil
+}
+
+func protoTakenAt(takenAt time.Time) *timestamppb.Timestamp {
+	if takenAt.IsZero() {
+		return nil
+	}
+
+	return timestamppb.New(takenAt)
 }
 
 type GuestSettingsService struct {

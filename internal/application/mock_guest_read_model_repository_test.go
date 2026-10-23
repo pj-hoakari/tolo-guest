@@ -69,6 +69,36 @@ func (mr *MockGuestReadModelRepositoryMockRecorder) ApplyStatus(ctx, status any)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ApplyStatus", reflect.TypeOf((*MockGuestReadModelRepository)(nil).ApplyStatus), ctx, status)
 }
 
+// FindDisplayNames mocks base method.
+func (m *MockGuestReadModelRepository) FindDisplayNames(ctx context.Context, eventID string) (domain.DisplayNames, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindDisplayNames", ctx, eventID)
+	ret0, _ := ret[0].(domain.DisplayNames)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindDisplayNames indicates an expected call of FindDisplayNames.
+func (mr *MockGuestReadModelRepositoryMockRecorder) FindDisplayNames(ctx, eventID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindDisplayNames", reflect.TypeOf((*MockGuestReadModelRepository)(nil).FindDisplayNames), ctx, eventID)
+}
+
+// FindStatus mocks base method.
+func (m *MockGuestReadModelRepository) FindStatus(ctx context.Context, eventID string) (domain.GuestStatus, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindStatus", ctx, eventID)
+	ret0, _ := ret[0].(domain.GuestStatus)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindStatus indicates an expected call of FindStatus.
+func (mr *MockGuestReadModelRepositoryMockRecorder) FindStatus(ctx, eventID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindStatus", reflect.TypeOf((*MockGuestReadModelRepository)(nil).FindStatus), ctx, eventID)
+}
+
 // ListEventIDs mocks base method.
 func (m *MockGuestReadModelRepository) ListEventIDs(ctx context.Context) ([]string, error) {
 	m.ctrl.T.Helper()
@@ -84,6 +114,21 @@ func (mr *MockGuestReadModelRepositoryMockRecorder) ListEventIDs(ctx any) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListEventIDs", reflect.TypeOf((*MockGuestReadModelRepository)(nil).ListEventIDs), ctx)
 }
 
+// ListMessages mocks base method.
+func (m *MockGuestReadModelRepository) ListMessages(ctx context.Context, eventID string) ([]domain.GuestMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListMessages", ctx, eventID)
+	ret0, _ := ret[0].([]domain.GuestMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListMessages indicates an expected call of ListMessages.
+func (mr *MockGuestReadModelRepositoryMockRecorder) ListMessages(ctx, eventID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListMessages", reflect.TypeOf((*MockGuestReadModelRepository)(nil).ListMessages), ctx, eventID)
+}
+
 // ReplaceMessages mocks base method.
 func (m *MockGuestReadModelRepository) ReplaceMessages(ctx context.Context, eventID string, messages []domain.GuestMessage) error {
 	m.ctrl.T.Helper()
@@ -96,4 +141,18 @@ func (m *MockGuestReadModelRepository) ReplaceMessages(ctx context.Context, even
 func (mr *MockGuestReadModelRepositoryMockRecorder) ReplaceMessages(ctx, eventID, messages any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReplaceMessages", reflect.TypeOf((*MockGuestReadModelRepository)(nil).ReplaceMessages), ctx, eventID, messages)
+}
+
+// SaveDisplayNames mocks base method.
+func (m *MockGuestReadModelRepository) SaveDisplayNames(ctx context.Context, names domain.DisplayNames) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveDisplayNames", ctx, names)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveDisplayNames indicates an expected call of SaveDisplayNames.
+func (mr *MockGuestReadModelRepositoryMockRecorder) SaveDisplayNames(ctx, names any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveDisplayNames", reflect.TypeOf((*MockGuestReadModelRepository)(nil).SaveDisplayNames), ctx, names)
 }

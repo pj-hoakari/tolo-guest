@@ -17,6 +17,7 @@ type readModelMocks struct {
 	settings  *MockGuestSettingsRepository
 	statuses  *MockGuestStatusSource
 	messages  *MockGuestMessageSource
+	names     *MockDisplayNameSource
 }
 
 func newGuestReadModelService(t *testing.T) (*application.GuestReadModelService, readModelMocks) {
@@ -28,9 +29,12 @@ func newGuestReadModelService(t *testing.T) (*application.GuestReadModelService,
 		settings:  NewMockGuestSettingsRepository(ctrl),
 		statuses:  NewMockGuestStatusSource(ctrl),
 		messages:  NewMockGuestMessageSource(ctrl),
+		names:     NewMockDisplayNameSource(ctrl),
 	}
 
-	return application.NewGuestReadModelService(mocks.readModel, mocks.settings, mocks.statuses, mocks.messages), mocks
+	return application.NewGuestReadModelService(
+		mocks.readModel, mocks.settings, mocks.statuses, mocks.messages, mocks.names,
+	), mocks
 }
 
 func TestApplyGuestPushes(t *testing.T) {
@@ -76,7 +80,7 @@ func TestApplyGuestPushes(t *testing.T) {
 func TestReconcile(t *testing.T) {
 	t.Parallel()
 
-	t.Run("pulls the snapshot of every known event and the messages of events with a tenant", func(t *testing.T) {
+	t.Run("pulls the snapshot and display names of every known event and the messages of events with a tenant", func(t *testing.T) {
 		t.Parallel()
 
 		service, mocks := newGuestReadModelService(t)
@@ -90,6 +94,11 @@ func TestReconcile(t *testing.T) {
 		mocks.statuses.EXPECT().GetGuestSnapshot(gomock.Any(), testEventPublicID).Return(snapshot, true, nil)
 		mocks.statuses.EXPECT().GetGuestSnapshot(gomock.Any(), otherEventPublicID).Return(domain.GuestStatus{}, false, nil)
 		mocks.readModel.EXPECT().ApplyStatus(gomock.Any(), snapshot).Return(nil)
+
+		names := domain.DisplayNames{EventID: testEventPublicID, RevisionID: "rev-1", Points: nil, Routes: nil, RouteEndpoints: nil}
+		mocks.names.EXPECT().GetDisplayNames(gomock.Any(), testEventPublicID).Return(names, true, nil)
+		mocks.names.EXPECT().GetDisplayNames(gomock.Any(), otherEventPublicID).Return(domain.DisplayNames{}, false, nil)
+		mocks.readModel.EXPECT().SaveDisplayNames(gomock.Any(), names).Return(nil)
 
 		mocks.messages.EXPECT().ListGuestMessages(gomock.Any(), testTenantPublicID, testEventPublicID).Return(messages, nil)
 		mocks.readModel.EXPECT().ReplaceMessages(gomock.Any(), testEventPublicID, messages).Return(nil)
@@ -107,6 +116,7 @@ func TestReconcile(t *testing.T) {
 		mocks.settings.EXPECT().ListEventTenants(gomock.Any()).
 			Return([]domain.EventTenant{{EventID: testEventPublicID, TenantPublicID: testTenantPublicID}}, nil)
 		mocks.statuses.EXPECT().GetGuestSnapshot(gomock.Any(), testEventPublicID).Return(domain.GuestStatus{}, false, nil)
+		mocks.names.EXPECT().GetDisplayNames(gomock.Any(), testEventPublicID).Return(domain.DisplayNames{}, false, nil)
 		mocks.messages.EXPECT().ListGuestMessages(gomock.Any(), testTenantPublicID, testEventPublicID).Return(nil, nil)
 		mocks.readModel.EXPECT().ReplaceMessages(gomock.Any(), testEventPublicID, nil).Return(nil)
 
@@ -127,6 +137,8 @@ func TestReconcile(t *testing.T) {
 		mocks.statuses.EXPECT().GetGuestSnapshot(gomock.Any(), testEventPublicID).Return(domain.GuestStatus{}, false, unavailable)
 		mocks.statuses.EXPECT().GetGuestSnapshot(gomock.Any(), otherEventPublicID).Return(snapshot, true, nil)
 		mocks.readModel.EXPECT().ApplyStatus(gomock.Any(), snapshot).Return(nil)
+		mocks.names.EXPECT().GetDisplayNames(gomock.Any(), testEventPublicID).Return(domain.DisplayNames{}, false, unavailable)
+		mocks.names.EXPECT().GetDisplayNames(gomock.Any(), otherEventPublicID).Return(domain.DisplayNames{}, false, nil)
 
 		if err := service.Reconcile(context.Background()); !errors.Is(err, unavailable) {
 			t.Errorf("Reconcile() error = %v, want %v", err, unavailable)

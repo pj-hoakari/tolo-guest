@@ -37,6 +37,7 @@ services:
             SERVER_ADDR: :8080
             OBSERVATION_URL: http://gateway:8090
             OPERATION_URL: http://gateway:8090
+            GRAPH_AUTHORING_URL: http://gateway:8090
         depends_on:
             migrate:
                 condition: service_completed_successfully

@@ -22,11 +22,22 @@ type GuestMessageSource interface {
 	ListGuestMessages(ctx context.Context, tenantPublicID, eventID string) ([]domain.GuestMessage, error)
 }
 
+type DisplayNameSource interface {
+	GetDisplayNames(ctx context.Context, eventID string) (domain.DisplayNames, bool, error)
+}
+
+const (
+	displayNameRequestBuffer = 64
+	displayNameRefreshPause  = time.Minute
+)
+
 type GuestReadModelService struct {
-	readModel repository.GuestReadModelRepository
-	settings  repository.GuestSettingsRepository
-	statuses  GuestStatusSource
-	messages  GuestMessageSource
+	readModel    repository.GuestReadModelRepository
+	settings     repository.GuestSettingsRepository
+	statuses     GuestStatusSource
+	messages     GuestMessageSource
+	displayNames DisplayNameSource
+	unknownNames chan string
 }
 
 func NewGuestReadModelService(
@@ -34,8 +45,16 @@ func NewGuestReadModelService(
 	settings repository.GuestSettingsRepository,
 	statuses GuestStatusSource,
 	messages GuestMessageSource,
+	displayNames DisplayNameSource,
 ) *GuestReadModelService {
-	return &GuestReadModelService{readModel: readModel, settings: settings, statuses: statuses, messages: messages}
+	return &GuestReadModelService{
+		readModel:    readModel,
+		settings:     settings,
+		statuses:     statuses,
+		messages:     messages,
+		displayNames: displayNames,
+		unknownNames: make(chan string, displayNameRequestBuffer),
+	}
 }
 
 func (s *GuestReadModelService) ApplyGuestStatus(ctx context.Context, status domain.GuestStatus) error {
@@ -80,6 +99,10 @@ func (s *GuestReadModelService) Reconcile(ctx context.Context) error {
 		if err := s.reconcileStatus(ctx, eventID); err != nil {
 			errs = append(errs, fmt.Errorf("reconcile guest status of event %s: %w", eventID, err))
 		}
+
+		if err := s.reconcileDisplayNames(ctx, eventID); err != nil {
+			errs = append(errs, fmt.Errorf("reconcile display names of event %s: %w", eventID, err))
+		}
 	}
 
 	for _, tenant := range tenants {
@@ -95,17 +118,54 @@ func (s *GuestReadModelService) RunReconciliation(ctx context.Context, interval 
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
-	for {
-		if err := s.Reconcile(ctx); err != nil && ctx.Err() == nil {
-			slog.ErrorContext(ctx, "reconcile guest read model failed", "error", err)
-		}
+	refreshedAt := map[string]time.Time{}
 
+	s.reconcileOrLog(ctx)
+
+	for {
 		select {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
+			s.reconcileOrLog(ctx)
+		case eventID := <-s.unknownNames:
+			if time.Since(refreshedAt[eventID]) < displayNameRefreshPause {
+				continue
+			}
+
+			refreshedAt[eventID] = time.Now()
+
+			if err := s.reconcileDisplayNames(ctx, eventID); err != nil && ctx.Err() == nil {
+				slog.ErrorContext(ctx, "refresh display names failed", "event_id", eventID, "error", err)
+			}
 		}
 	}
+}
+
+func (s *GuestReadModelService) reconcileOrLog(ctx context.Context) {
+	if err := s.Reconcile(ctx); err != nil && ctx.Err() == nil {
+		slog.ErrorContext(ctx, "reconcile guest read model failed", "error", err)
+	}
+}
+
+func (s *GuestReadModelService) requestDisplayNames(eventID string) {
+	select {
+	case s.unknownNames <- eventID:
+	default:
+	}
+}
+
+func (s *GuestReadModelService) reconcileDisplayNames(ctx context.Context, eventID string) error {
+	names, found, err := s.displayNames.GetDisplayNames(ctx, eventID)
+	if err != nil {
+		return err
+	}
+
+	if !found {
+		return nil
+	}
+
+	return s.readModel.SaveDisplayNames(ctx, names)
 }
 
 func (s *GuestReadModelService) reconcileStatus(ctx context.Context, eventID string) error {

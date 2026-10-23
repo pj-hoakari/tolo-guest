@@ -95,3 +95,43 @@ func (mr *MockGuestMessageSourceMockRecorder) ListGuestMessages(ctx, tenantPubli
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListGuestMessages", reflect.TypeOf((*MockGuestMessageSource)(nil).ListGuestMessages), ctx, tenantPublicID, eventID)
 }
+
+// MockDisplayNameSource is a mock of DisplayNameSource interface.
+type MockDisplayNameSource struct {
+	ctrl     *gomock.Controller
+	recorder *MockDisplayNameSourceMockRecorder
+	isgomock struct{}
+}
+
+// MockDisplayNameSourceMockRecorder is the mock recorder for MockDisplayNameSource.
+type MockDisplayNameSourceMockRecorder struct {
+	mock *MockDisplayNameSource
+}
+
+// NewMockDisplayNameSource creates a new mock instance.
+func NewMockDisplayNameSource(ctrl *gomock.Controller) *MockDisplayNameSource {
+	mock := &MockDisplayNameSource{ctrl: ctrl}
+	mock.recorder = &MockDisplayNameSourceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockDisplayNameSource) EXPECT() *MockDisplayNameSourceMockRecorder {
+	return m.recorder
+}
+
+// GetDisplayNames mocks base method.
+func (m *MockDisplayNameSource) GetDisplayNames(ctx context.Context, eventID string) (domain.DisplayNames, bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDisplayNames", ctx, eventID)
+	ret0, _ := ret[0].(domain.DisplayNames)
+	ret1, _ := ret[1].(bool)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetDisplayNames indicates an expected call of GetDisplayNames.
+func (mr *MockDisplayNameSourceMockRecorder) GetDisplayNames(ctx, eventID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDisplayNames", reflect.TypeOf((*MockDisplayNameSource)(nil).GetDisplayNames), ctx, eventID)
+}

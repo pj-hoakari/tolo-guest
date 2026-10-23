@@ -69,6 +69,11 @@ func run() error {
 		return errors.New("OPERATION_URL is required")
 	}
 
+	graphAuthoringURL := os.Getenv("GRAPH_AUTHORING_URL")
+	if graphAuthoringURL == "" {
+		return errors.New("GRAPH_AUTHORING_URL is required")
+	}
+
 	reconcileInterval, err := time.ParseDuration(getenv("RECONCILE_INTERVAL", defaultReconcileInterval.String()))
 	if err != nil {
 		return fmt.Errorf("read RECONCILE_INTERVAL: %w", err)
@@ -105,6 +110,7 @@ func run() error {
 		guestSettings,
 		connectinfra.NewObservationClient(upstream, observationURL),
 		connectinfra.NewOperationClient(upstream, operationURL),
+		connectinfra.NewGraphAuthoringClient(upstream, graphAuthoringURL),
 	)
 
 	reconcileCtx, stopReconcile := context.WithCancel(ctx)
@@ -124,6 +130,7 @@ func run() error {
 	serviceRoutes, err := connectinfra.RoutesWithJWTSettings(
 		jwtSettings,
 		application.NewGuestSettingsService(guestSettings),
+		readModel,
 	)
 	if err != nil {
 		return fmt.Errorf("build handler: %w", err)
