@@ -64,10 +64,10 @@ func (c *ObservationClient) GetGuestSnapshot(ctx context.Context, eventID string
 		return domain.GuestStatus{}, false, fmt.Errorf("call GetGuestSnapshot: %w", err)
 	}
 
-	return guestStatus(res.GetStatus()), true, nil
+	return GuestStatus(res.GetStatus()), true, nil
 }
 
-func guestStatus(status *observationv1.GuestStatus) domain.GuestStatus {
+func GuestStatus(status *observationv1.GuestStatus) domain.GuestStatus {
 	crowd := make([]domain.CrowdStatus, 0, len(status.GetCrowd()))
 	for _, c := range status.GetCrowd() {
 		target := domain.CrowdTarget{Kind: domain.CrowdTargetUnspecified, ID: ""}
@@ -99,6 +99,23 @@ func guestStatus(status *observationv1.GuestStatus) domain.GuestStatus {
 		TakenAt:  status.GetTakenAt().AsTime(),
 		Crowd:    crowd,
 		Queues:   queues,
+	}
+}
+
+func GuestMessagesUpdate(update *operationv1.GuestMessagesUpdate) domain.GuestMessagesUpdate {
+	upserts := make([]domain.GuestMessage, 0, len(update.GetUpserts()))
+	for _, message := range update.GetUpserts() {
+		upserts = append(upserts, domain.GuestMessage{
+			MessageID: message.GetMessageId(),
+			Body:      message.GetBody(),
+			SentAt:    message.GetSentAt().AsTime(),
+		})
+	}
+
+	return domain.GuestMessagesUpdate{
+		EventID:           update.GetEventId(),
+		Upserts:           upserts,
+		RevokedMessageIDs: update.GetRevokedMessageIds(),
 	}
 }
 
