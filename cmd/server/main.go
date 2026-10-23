@@ -114,6 +114,7 @@ func run() error {
 		connectinfra.NewOperationClient(upstream, operationURL),
 		graphAuthoring,
 		graphAuthoring,
+		dbinfra.NewPostgresQrAccessRepository(db),
 	)
 
 	reconcileCtx, stopReconcile := context.WithCancel(ctx)

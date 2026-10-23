@@ -9,6 +9,7 @@ import (
 
 	"go.uber.org/mock/gomock"
 
+	"github.com/pj-hoakari/tolo-guest/internal/application"
 	"github.com/pj-hoakari/tolo-guest/internal/domain"
 	"github.com/pj-hoakari/tolo-guest/internal/repository"
 )
@@ -202,6 +203,130 @@ func TestListGuestMessages(t *testing.T) {
 
 		if _, err := service.ListGuestMessages(context.Background(), testEventPublicID); !errors.Is(err, down) {
 			t.Errorf("ListGuestMessages() error = %v, want %v", err, down)
+		}
+	})
+}
+
+func TestOpenGuestPage(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	locations := domain.QrLocations{
+		EventID:    testEventPublicID,
+		RevisionID: "rev-1",
+		Locations: []domain.QrLocation{
+			{QrLocationID: "qr-east", Name: "東門", Kind: "entrance"},
+			{QrLocationID: "qr-hall", Name: "ホール前", Kind: "queue"},
+		},
+	}
+	settings := domain.GuestSettings{
+		EventID:        testEventPublicID,
+		TenantPublicID: testTenantPublicID,
+		PageCompositions: []domain.PageComposition{
+			{Kind: "entrance", Components: []domain.Component{domain.ComponentStaffMessages, domain.ComponentCrowd}},
+		},
+	}
+	access := func(qrLocationID string) domain.QrAccess {
+		return domain.QrAccess{EventID: testEventPublicID, QrLocationID: qrLocationID, TenantPublicID: testTenantPublicID}
+	}
+
+	open := func(t *testing.T, service *application.GuestReadModelService, qrLocationID string, want []domain.Component) {
+		t.Helper()
+
+		got, err := service.OpenGuestPage(ctx, testEventPublicID, qrLocationID)
+		if err != nil {
+			t.Fatalf("OpenGuestPage() error = %v", err)
+		}
+
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("OpenGuestPage() = %v, want %v", got, want)
+		}
+	}
+
+	t.Run("answers the composition of the location's kind and counts the open once", func(t *testing.T) {
+		t.Parallel()
+
+		service, mocks := newGuestReadModelService(t)
+		mocks.readModel.EXPECT().FindQrLocations(gomock.Any(), testEventPublicID).Return(locations, nil)
+		mocks.settings.EXPECT().Find(gomock.Any(), testEventPublicID).Return(settings, nil)
+		mocks.accesses.EXPECT().RecordQrAccess(gomock.Any(), access("qr-east")).Return(nil)
+
+		open(t, service, "qr-east", []domain.Component{domain.ComponentStaffMessages, domain.ComponentCrowd})
+	})
+
+	t.Run("answers the default composition for a kind without a composition and still counts", func(t *testing.T) {
+		t.Parallel()
+
+		service, mocks := newGuestReadModelService(t)
+		mocks.readModel.EXPECT().FindQrLocations(gomock.Any(), testEventPublicID).Return(locations, nil)
+		mocks.settings.EXPECT().Find(gomock.Any(), testEventPublicID).Return(settings, nil)
+		mocks.accesses.EXPECT().RecordQrAccess(gomock.Any(), access("qr-hall")).Return(nil)
+
+		open(t, service, "qr-hall", domain.DefaultComponents())
+	})
+
+	t.Run("answers the default composition without counting for a location missing from the pulled list", func(t *testing.T) {
+		t.Parallel()
+
+		service, mocks := newGuestReadModelService(t)
+		mocks.readModel.EXPECT().FindQrLocations(gomock.Any(), testEventPublicID).Return(locations, nil)
+
+		open(t, service, "qr-unknown", domain.DefaultComponents())
+	})
+
+	t.Run("answers the default composition without counting for an event whose locations are not pulled", func(t *testing.T) {
+		t.Parallel()
+
+		service, mocks := newGuestReadModelService(t)
+		mocks.readModel.EXPECT().FindQrLocations(gomock.Any(), testEventPublicID).Return(domain.QrLocations{}, repository.ErrQrLocationsNotFound)
+
+		open(t, service, "qr-east", domain.DefaultComponents())
+	})
+
+	t.Run("does not count a known location of an event whose tenant is unknown", func(t *testing.T) {
+		t.Parallel()
+
+		service, mocks := newGuestReadModelService(t)
+		mocks.readModel.EXPECT().FindQrLocations(gomock.Any(), testEventPublicID).Return(locations, nil)
+		mocks.settings.EXPECT().Find(gomock.Any(), testEventPublicID).Return(domain.GuestSettings{}, repository.ErrGuestSettingsNotFound)
+
+		open(t, service, "qr-east", domain.DefaultComponents())
+	})
+
+	t.Run("still answers the composition when counting fails", func(t *testing.T) {
+		t.Parallel()
+
+		service, mocks := newGuestReadModelService(t)
+		mocks.readModel.EXPECT().FindQrLocations(gomock.Any(), testEventPublicID).Return(locations, nil)
+		mocks.settings.EXPECT().Find(gomock.Any(), testEventPublicID).Return(settings, nil)
+		mocks.accesses.EXPECT().RecordQrAccess(gomock.Any(), access("qr-east")).Return(errors.New("database unavailable"))
+
+		open(t, service, "qr-east", []domain.Component{domain.ComponentStaffMessages, domain.ComponentCrowd})
+	})
+
+	t.Run("reports a failed read of the QR locations", func(t *testing.T) {
+		t.Parallel()
+
+		service, mocks := newGuestReadModelService(t)
+		unavailable := errors.New("database unavailable")
+		mocks.readModel.EXPECT().FindQrLocations(gomock.Any(), testEventPublicID).Return(domain.QrLocations{}, unavailable)
+
+		if _, err := service.OpenGuestPage(ctx, testEventPublicID, "qr-east"); !errors.Is(err, unavailable) {
+			t.Errorf("OpenGuestPage() error = %v, want %v", err, unavailable)
+		}
+	})
+
+	t.Run("rejects a missing event ID or QR location ID", func(t *testing.T) {
+		t.Parallel()
+
+		service, _ := newGuestReadModelService(t)
+
+		if _, err := service.OpenGuestPage(ctx, "", "qr-east"); !errors.Is(err, domain.ErrEventIDRequired) {
+			t.Errorf("OpenGuestPage() error = %v, want %v", err, domain.ErrEventIDRequired)
+		}
+
+		if _, err := service.OpenGuestPage(ctx, testEventPublicID, ""); !errors.Is(err, domain.ErrQrLocationIDRequired) {
+			t.Errorf("OpenGuestPage() error = %v, want %v", err, domain.ErrQrLocationIDRequired)
 		}
 	})
 }

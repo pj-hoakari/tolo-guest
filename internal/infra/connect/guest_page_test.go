@@ -3,6 +3,7 @@ package connect
 import (
 	"context"
 	"net/http"
+	"slices"
 	"sync"
 	"testing"
 	"time"
@@ -26,6 +27,7 @@ type memoryReadModel struct {
 	names    map[string]domain.DisplayNames
 	messages map[string][]domain.GuestMessage
 	qr       map[string]domain.QrLocations
+	accesses []domain.QrAccess
 }
 
 func newMemoryReadModel() *memoryReadModel {
@@ -38,7 +40,23 @@ func newMemoryReadModel() *memoryReadModel {
 }
 
 func newGuestPageUseCases(readModel *memoryReadModel) *application.GuestReadModelService {
-	return application.NewGuestReadModelService(readModel, &memoryGuestSettings{byEvent: map[string]domain.GuestSettings{}}, nil, nil, nil, nil)
+	return application.NewGuestReadModelService(readModel, &memoryGuestSettings{byEvent: map[string]domain.GuestSettings{}}, nil, nil, nil, nil, readModel)
+}
+
+func (m *memoryReadModel) RecordQrAccess(_ context.Context, access domain.QrAccess) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.accesses = append(m.accesses, access)
+
+	return nil
+}
+
+func (m *memoryReadModel) recordedQrAccesses() []domain.QrAccess {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	return slices.Clone(m.accesses)
 }
 
 func (m *memoryReadModel) ApplyStatus(_ context.Context, status domain.GuestStatus) error {
@@ -50,7 +68,9 @@ func (m *memoryReadModel) ApplyStatus(_ context.Context, status domain.GuestStat
 	return nil
 }
 
-func (m *memoryReadModel) ApplyMessages(context.Context, domain.GuestMessagesUpdate) error { return nil }
+func (m *memoryReadModel) ApplyMessages(context.Context, domain.GuestMessagesUpdate) error {
+	return nil
+}
 
 func (m *memoryReadModel) ReplaceMessages(_ context.Context, eventID string, messages []domain.GuestMessage) error {
 	m.mu.Lock()
@@ -264,5 +284,107 @@ func TestGuestPageComponents(t *testing.T) {
 
 		_, err = client.ListGuestMessages(ctx, &guestv1.ListGuestMessagesRequest{})
 		assertConnectError(t, err, connectrpc.CodeInvalidArgument, "event ID is required")
+	})
+}
+
+func TestOpenGuestPage(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	readModel := newMemoryReadModel()
+	_ = readModel.SaveQrLocations(ctx, domain.QrLocations{
+		EventID:    testEventPublicID,
+		RevisionID: "rev-1",
+		Locations: []domain.QrLocation{
+			{QrLocationID: "qr-east", Name: "東門", Kind: "entrance"},
+			{QrLocationID: "qr-hall", Name: "ホール前", Kind: "queue"},
+		},
+	})
+
+	settings := &memoryGuestSettings{byEvent: map[string]domain.GuestSettings{testEventPublicID: {
+		EventID:        testEventPublicID,
+		TenantPublicID: testTenantPublicID,
+		PageCompositions: []domain.PageComposition{
+			{Kind: "entrance", Components: []domain.Component{domain.ComponentStaffMessages, domain.ComponentCrowd}},
+		},
+	}}}
+
+	routes, err := RoutesWithVerifier(
+		newTestVerifier(t, internaljwt.JWKS{}),
+		newGuestSettingsUseCases(),
+		application.NewGuestReadModelService(readModel, settings, nil, nil, nil, nil, readModel),
+	)
+	if err != nil {
+		t.Fatalf("RoutesWithVerifier() error = %v", err)
+	}
+
+	mux := http.NewServeMux()
+	routes(mux)
+
+	client := guestv1connect.NewGuestPageServiceClient(newClient(newTestServer(t, mux)))
+
+	open := func(t *testing.T, eventID, qrLocationID string) []guestv1.GuestComponent {
+		t.Helper()
+
+		got, err := client.OpenGuestPage(ctx, &guestv1.OpenGuestPageRequest{EventId: eventID, QrLocationId: qrLocationID})
+		if err != nil {
+			t.Fatalf("OpenGuestPage() error = %v", err)
+		}
+
+		return got.GetComponents()
+	}
+
+	defaults := []guestv1.GuestComponent{
+		guestv1.GuestComponent_GUEST_COMPONENT_CROWD,
+		guestv1.GuestComponent_GUEST_COMPONENT_QUEUES,
+		guestv1.GuestComponent_GUEST_COMPONENT_STAFF_MESSAGES,
+	}
+
+	t.Run("answers the composition of the location's kind without a token and counts the page open once", func(t *testing.T) {
+		got := open(t, testEventPublicID, "qr-east")
+
+		want := []guestv1.GuestComponent{guestv1.GuestComponent_GUEST_COMPONENT_STAFF_MESSAGES, guestv1.GuestComponent_GUEST_COMPONENT_CROWD}
+		if !slices.Equal(got, want) {
+			t.Errorf("OpenGuestPage() components = %v, want %v", got, want)
+		}
+
+		_, _ = client.GetCrowd(ctx, &guestv1.GetCrowdRequest{EventId: testEventPublicID})
+		_, _ = client.GetQueues(ctx, &guestv1.GetQueuesRequest{EventId: testEventPublicID})
+		_, _ = client.ListGuestMessages(ctx, &guestv1.ListGuestMessagesRequest{EventId: testEventPublicID})
+
+		wantAccesses := []domain.QrAccess{{EventID: testEventPublicID, QrLocationID: "qr-east", TenantPublicID: testTenantPublicID}}
+		if got := readModel.recordedQrAccesses(); !slices.Equal(got, wantAccesses) {
+			t.Errorf("recorded QR accesses = %+v, want %+v", got, wantAccesses)
+		}
+	})
+
+	t.Run("answers the default composition for a kind without a composition", func(t *testing.T) {
+		if got := open(t, testEventPublicID, "qr-hall"); !slices.Equal(got, defaults) {
+			t.Errorf("OpenGuestPage() components = %v, want %v", got, defaults)
+		}
+	})
+
+	t.Run("answers the default composition without counting for an unknown location", func(t *testing.T) {
+		before := len(readModel.recordedQrAccesses())
+
+		if got := open(t, testEventPublicID, "qr-unknown"); !slices.Equal(got, defaults) {
+			t.Errorf("OpenGuestPage() components = %v, want %v", got, defaults)
+		}
+
+		if got := open(t, otherEventPublicID, "qr-east"); !slices.Equal(got, defaults) {
+			t.Errorf("OpenGuestPage() components = %v, want %v", got, defaults)
+		}
+
+		if after := len(readModel.recordedQrAccesses()); after != before {
+			t.Errorf("recorded QR accesses = %d, want %d", after, before)
+		}
+	})
+
+	t.Run("a missing event ID or QR location ID is an invalid argument", func(t *testing.T) {
+		_, err := client.OpenGuestPage(ctx, &guestv1.OpenGuestPageRequest{QrLocationId: "qr-east"})
+		assertConnectError(t, err, connectrpc.CodeInvalidArgument, "event ID is required")
+
+		_, err = client.OpenGuestPage(ctx, &guestv1.OpenGuestPageRequest{EventId: testEventPublicID})
+		assertConnectError(t, err, connectrpc.CodeInvalidArgument, "QR location ID is required")
 	})
 }

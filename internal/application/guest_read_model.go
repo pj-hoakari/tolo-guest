@@ -1,6 +1,7 @@
 package application
 
 //go:generate go tool mockgen -source=../repository/guest_read_model.go -destination=mock_guest_read_model_repository_test.go -package=application_test
+//go:generate go tool mockgen -source=../repository/qr_accesses.go -destination=mock_qr_access_repository_test.go -package=application_test
 //go:generate go tool mockgen -source=guest_read_model.go -destination=mock_guest_read_model_sources_test.go -package=application_test
 
 import (
@@ -42,6 +43,7 @@ type GuestReadModelService struct {
 	messages     GuestMessageSource
 	displayNames DisplayNameSource
 	qrLocations  QrLocationSource
+	qrAccesses   repository.QrAccessRepository
 	unknownNames chan string
 }
 
@@ -52,6 +54,7 @@ func NewGuestReadModelService(
 	messages GuestMessageSource,
 	displayNames DisplayNameSource,
 	qrLocations QrLocationSource,
+	qrAccesses repository.QrAccessRepository,
 ) *GuestReadModelService {
 	return &GuestReadModelService{
 		readModel:    readModel,
@@ -60,6 +63,7 @@ func NewGuestReadModelService(
 		messages:     messages,
 		displayNames: displayNames,
 		qrLocations:  qrLocations,
+		qrAccesses:   qrAccesses,
 		unknownNames: make(chan string, displayNameRequestBuffer),
 	}
 }

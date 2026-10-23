@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/pj-hoakari/tolo-guest/internal/domain"
@@ -11,9 +12,48 @@ import (
 )
 
 type GuestPageUseCases interface {
+	OpenGuestPage(ctx context.Context, eventID, qrLocationID string) ([]domain.Component, error)
 	GetCrowd(ctx context.Context, eventID, language string) (domain.CrowdView, error)
 	GetQueues(ctx context.Context, eventID, language string) (domain.QueuesView, error)
 	ListGuestMessages(ctx context.Context, eventID string) ([]domain.GuestMessage, error)
+}
+
+func (s *GuestReadModelService) OpenGuestPage(ctx context.Context, eventID, qrLocationID string) ([]domain.Component, error) {
+	if eventID == "" {
+		return nil, domain.ErrEventIDRequired
+	}
+
+	if qrLocationID == "" {
+		return nil, domain.ErrQrLocationIDRequired
+	}
+
+	locations, err := s.readModel.FindQrLocations(ctx, eventID)
+	if errors.Is(err, repository.ErrQrLocationsNotFound) {
+		return domain.DefaultComponents(), nil
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("find QR locations: %w", err)
+	}
+
+	location, found := locations.Find(qrLocationID)
+	if !found {
+		return domain.DefaultComponents(), nil
+	}
+
+	settings, err := findGuestSettings(ctx, s.settings, eventID)
+	if err != nil {
+		return nil, err
+	}
+
+	if settings.TenantPublicID != "" {
+		access := domain.QrAccess{EventID: eventID, QrLocationID: qrLocationID, TenantPublicID: settings.TenantPublicID}
+		if err := s.qrAccesses.RecordQrAccess(ctx, access); err != nil {
+			slog.ErrorContext(ctx, "record QR access failed", "event_id", eventID, "qr_location_id", qrLocationID, "error", err)
+		}
+	}
+
+	return settings.Components(location.Kind), nil
 }
 
 func (s *GuestReadModelService) GetCrowd(ctx context.Context, eventID, language string) (domain.CrowdView, error) {

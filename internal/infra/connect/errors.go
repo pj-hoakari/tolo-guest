@@ -20,6 +20,7 @@ var clientErrors = []struct {
 	message string
 }{
 	{domain.ErrEventIDRequired, connectrpc.CodeInvalidArgument, "event ID is required"},
+	{domain.ErrQrLocationIDRequired, connectrpc.CodeInvalidArgument, "QR location ID is required"},
 	{domain.ErrKindRequired, connectrpc.CodeInvalidArgument, "page composition kind is required"},
 	{domain.ErrDuplicateKind, connectrpc.CodeInvalidArgument, "page composition kind is duplicated"},
 	{domain.ErrComponentUnspecified, connectrpc.CodeInvalidArgument, "page composition component is unspecified"},
