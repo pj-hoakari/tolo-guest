@@ -21,7 +21,7 @@ require (
 	github.com/pj-hoakari/internal-jwt-handling v0.4.0
 	github.com/pj-hoakari/protoc-gen-authz-go v0.3.0
 	github.com/pj-hoakari/tolo-observation v0.4.0-rc
-	github.com/pj-hoakari/tolo-operation v0.1.0-dev.0.20261023124529-995cc4b92188
+	github.com/pj-hoakari/tolo-operation v0.2.0-dev
 	github.com/testcontainers/testcontainers-go v0.44.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.44.0
 	go.opentelemetry.io/otel v1.47.0
