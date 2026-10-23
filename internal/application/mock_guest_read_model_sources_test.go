@@ -135,3 +135,43 @@ func (mr *MockDisplayNameSourceMockRecorder) GetDisplayNames(ctx, eventID any) *
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDisplayNames", reflect.TypeOf((*MockDisplayNameSource)(nil).GetDisplayNames), ctx, eventID)
 }
+
+// MockQrLocationSource is a mock of QrLocationSource interface.
+type MockQrLocationSource struct {
+	ctrl     *gomock.Controller
+	recorder *MockQrLocationSourceMockRecorder
+	isgomock struct{}
+}
+
+// MockQrLocationSourceMockRecorder is the mock recorder for MockQrLocationSource.
+type MockQrLocationSourceMockRecorder struct {
+	mock *MockQrLocationSource
+}
+
+// NewMockQrLocationSource creates a new mock instance.
+func NewMockQrLocationSource(ctrl *gomock.Controller) *MockQrLocationSource {
+	mock := &MockQrLocationSource{ctrl: ctrl}
+	mock.recorder = &MockQrLocationSourceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockQrLocationSource) EXPECT() *MockQrLocationSourceMockRecorder {
+	return m.recorder
+}
+
+// GetQrLocations mocks base method.
+func (m *MockQrLocationSource) GetQrLocations(ctx context.Context, tenantPublicID, eventID, revisionID string) (domain.QrLocations, bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetQrLocations", ctx, tenantPublicID, eventID, revisionID)
+	ret0, _ := ret[0].(domain.QrLocations)
+	ret1, _ := ret[1].(bool)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetQrLocations indicates an expected call of GetQrLocations.
+func (mr *MockQrLocationSourceMockRecorder) GetQrLocations(ctx, tenantPublicID, eventID, revisionID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetQrLocations", reflect.TypeOf((*MockQrLocationSource)(nil).GetQrLocations), ctx, tenantPublicID, eventID, revisionID)
+}

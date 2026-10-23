@@ -77,8 +77,10 @@ func (f *fakeStaffCommunication) ListStaffMessages(
 type fakeGraphSupply struct {
 	graphv1connect.UnimplementedGraphSupplyServiceHandler
 
-	calls chan upstreamCall
-	names *graphv1.GetDisplayNamesResponse
+	calls       chan upstreamCall
+	names       *graphv1.GetDisplayNamesResponse
+	qrRequests  chan *graphv1.GetQrLocationsRequest
+	qrLocations []*graphv1.QrLocation
 }
 
 func (f *fakeGraphSupply) GetDisplayNames(
@@ -92,6 +94,21 @@ func (f *fakeGraphSupply) GetDisplayNames(
 	}
 
 	return f.names, nil
+}
+
+func (f *fakeGraphSupply) GetQrLocations(
+	ctx context.Context,
+	req *graphv1.GetQrLocationsRequest,
+) (*graphv1.GetQrLocationsResponse, error) {
+	f.calls <- recordCall(ctx)
+
+	f.qrRequests <- req
+
+	if req.GetRevisionId() != "rev-1" {
+		return nil, connectrpc.NewError(connectrpc.CodeNotFound, "revision not found")
+	}
+
+	return &graphv1.GetQrLocationsResponse{QrLocations: f.qrLocations, RevisionId: req.GetRevisionId()}, nil
 }
 
 func newGatewayServer(t *testing.T, register func(*connectrpc.Server)) string {
@@ -222,7 +239,12 @@ func TestGraphAuthoringClient(t *testing.T) {
 	t.Parallel()
 
 	fake := &fakeGraphSupply{
-		calls: make(chan upstreamCall, 2),
+		calls:      make(chan upstreamCall, 2),
+		qrRequests: make(chan *graphv1.GetQrLocationsRequest, 2),
+		qrLocations: []*graphv1.QrLocation{
+			{QrLocationId: "qr-east", Name: "東門", Kind: "entrance"},
+			{QrLocationId: "qr-hall", Name: "ホール前", Kind: "queue"},
+		},
 		names: &graphv1.GetDisplayNamesResponse{
 			RevisionId: "rev-1",
 			DisplayNames: map[string]*graphv1.LocalizedText{
@@ -270,4 +292,35 @@ func TestGraphAuthoringClient(t *testing.T) {
 	}
 
 	assertNewMachineCaller(t, <-fake.calls)
+
+	locations, found, err := client.GetQrLocations(authorized("Bearer leaked"), testTenantPublicID, testEventPublicID, "rev-1")
+	if err != nil || !found {
+		t.Fatalf("GetQrLocations() = _, %v, %v, want found", found, err)
+	}
+
+	wantLocations := domain.QrLocations{
+		EventID:    testEventPublicID,
+		RevisionID: "rev-1",
+		Locations: []domain.QrLocation{
+			{QrLocationID: "qr-east", Name: "東門", Kind: "entrance"},
+			{QrLocationID: "qr-hall", Name: "ホール前", Kind: "queue"},
+		},
+	}
+	if !reflect.DeepEqual(locations, wantLocations) {
+		t.Errorf("GetQrLocations() = %+v, want %+v", locations, wantLocations)
+	}
+
+	assertNewMachineCaller(t, <-fake.calls)
+
+	req := <-fake.qrRequests
+	if req.GetEventId() != testEventPublicID || req.GetRevisionId() != "rev-1" || req.GetTenantId() != testTenantPublicID {
+		t.Errorf("GetQrLocations request = %v, want the event, the revision and the tenant", req)
+	}
+
+	if _, found, err := client.GetQrLocations(context.Background(), testTenantPublicID, testEventPublicID, "rev-gone"); err != nil || found {
+		t.Errorf("GetQrLocations() for an unpublished revision = _, %v, %v, want not found without error", found, err)
+	}
+
+	assertNewMachineCaller(t, <-fake.calls)
+	<-fake.qrRequests
 }

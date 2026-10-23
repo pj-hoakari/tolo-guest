@@ -36,7 +36,7 @@ func newMemoryReadModel() *memoryReadModel {
 }
 
 func newGuestPageUseCases(readModel *memoryReadModel) *application.GuestReadModelService {
-	return application.NewGuestReadModelService(readModel, &memoryGuestSettings{byEvent: map[string]domain.GuestSettings{}}, nil, nil, nil)
+	return application.NewGuestReadModelService(readModel, &memoryGuestSettings{byEvent: map[string]domain.GuestSettings{}}, nil, nil, nil, nil)
 }
 
 func (m *memoryReadModel) ApplyStatus(_ context.Context, status domain.GuestStatus) error {
@@ -99,6 +99,14 @@ func (m *memoryReadModel) FindDisplayNames(_ context.Context, eventID string) (d
 	}
 
 	return names, nil
+}
+
+func (m *memoryReadModel) SaveQrLocations(context.Context, domain.QrLocations) error {
+	return nil
+}
+
+func (m *memoryReadModel) FindQrLocations(context.Context, string) (domain.QrLocations, error) {
+	return domain.QrLocations{}, repository.ErrQrLocationsNotFound
 }
 
 func newGuestPageClient(t *testing.T) guestv1connect.GuestPageServiceClient {

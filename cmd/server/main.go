@@ -105,12 +105,14 @@ func run() error {
 
 	guestSettings := dbinfra.NewPostgresGuestSettingsRepository(db)
 	upstream := &http.Client{Timeout: upstreamTimeout}
+	graphAuthoring := connectinfra.NewGraphAuthoringClient(upstream, graphAuthoringURL)
 	readModel := application.NewGuestReadModelService(
 		dbinfra.NewPostgresGuestReadModelRepository(db),
 		guestSettings,
 		connectinfra.NewObservationClient(upstream, observationURL),
 		connectinfra.NewOperationClient(upstream, operationURL),
-		connectinfra.NewGraphAuthoringClient(upstream, graphAuthoringURL),
+		graphAuthoring,
+		graphAuthoring,
 	)
 
 	reconcileCtx, stopReconcile := context.WithCancel(ctx)

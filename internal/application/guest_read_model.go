@@ -26,6 +26,10 @@ type DisplayNameSource interface {
 	GetDisplayNames(ctx context.Context, eventID string) (domain.DisplayNames, bool, error)
 }
 
+type QrLocationSource interface {
+	GetQrLocations(ctx context.Context, tenantPublicID, eventID, revisionID string) (domain.QrLocations, bool, error)
+}
+
 const (
 	displayNameRequestBuffer = 64
 	displayNameRefreshPause  = time.Minute
@@ -37,6 +41,7 @@ type GuestReadModelService struct {
 	statuses     GuestStatusSource
 	messages     GuestMessageSource
 	displayNames DisplayNameSource
+	qrLocations  QrLocationSource
 	unknownNames chan string
 }
 
@@ -46,6 +51,7 @@ func NewGuestReadModelService(
 	statuses GuestStatusSource,
 	messages GuestMessageSource,
 	displayNames DisplayNameSource,
+	qrLocations QrLocationSource,
 ) *GuestReadModelService {
 	return &GuestReadModelService{
 		readModel:    readModel,
@@ -53,6 +59,7 @@ func NewGuestReadModelService(
 		statuses:     statuses,
 		messages:     messages,
 		displayNames: displayNames,
+		qrLocations:  qrLocations,
 		unknownNames: make(chan string, displayNameRequestBuffer),
 	}
 }
@@ -95,19 +102,28 @@ func (s *GuestReadModelService) Reconcile(ctx context.Context) error {
 
 	var errs []error
 
+	revisions := make(map[string]string, len(events))
+
 	for eventID := range events {
 		if err := s.reconcileStatus(ctx, eventID); err != nil {
 			errs = append(errs, fmt.Errorf("reconcile guest status of event %s: %w", eventID, err))
 		}
 
-		if err := s.reconcileDisplayNames(ctx, eventID); err != nil {
+		revisionID, err := s.reconcileDisplayNames(ctx, eventID)
+		if err != nil {
 			errs = append(errs, fmt.Errorf("reconcile display names of event %s: %w", eventID, err))
 		}
+
+		revisions[eventID] = revisionID
 	}
 
 	for _, tenant := range tenants {
 		if err := s.reconcileMessages(ctx, tenant); err != nil {
 			errs = append(errs, fmt.Errorf("reconcile guest messages of event %s: %w", tenant.EventID, err))
+		}
+
+		if err := s.reconcileQrLocations(ctx, tenant, revisions[tenant.EventID]); err != nil {
+			errs = append(errs, fmt.Errorf("reconcile QR locations of event %s: %w", tenant.EventID, err))
 		}
 	}
 
@@ -135,7 +151,7 @@ func (s *GuestReadModelService) RunReconciliation(ctx context.Context, interval 
 
 			refreshedAt[eventID] = time.Now()
 
-			if err := s.reconcileDisplayNames(ctx, eventID); err != nil && ctx.Err() == nil {
+			if _, err := s.reconcileDisplayNames(ctx, eventID); err != nil && ctx.Err() == nil {
 				slog.ErrorContext(ctx, "refresh display names failed", "event_id", eventID, "error", err)
 			}
 		}
@@ -155,17 +171,50 @@ func (s *GuestReadModelService) requestDisplayNames(eventID string) {
 	}
 }
 
-func (s *GuestReadModelService) reconcileDisplayNames(ctx context.Context, eventID string) error {
+func (s *GuestReadModelService) reconcileDisplayNames(ctx context.Context, eventID string) (string, error) {
 	names, found, err := s.displayNames.GetDisplayNames(ctx, eventID)
+	if err != nil {
+		return "", err
+	}
+
+	if !found {
+		return "", nil
+	}
+
+	if err := s.readModel.SaveDisplayNames(ctx, names); err != nil {
+		return "", err
+	}
+
+	return names.RevisionID, nil
+}
+
+func (s *GuestReadModelService) reconcileQrLocations(ctx context.Context, tenant domain.EventTenant, revisionID string) error {
+	if revisionID == "" {
+		return nil
+	}
+
+	current, err := s.readModel.FindQrLocations(ctx, tenant.EventID)
+	if err == nil && current.RevisionID == revisionID {
+		return nil
+	}
+
+	if err != nil && !errors.Is(err, repository.ErrQrLocationsNotFound) {
+		return err
+	}
+
+	locations, found, err := s.qrLocations.GetQrLocations(ctx, tenant.TenantPublicID, tenant.EventID, revisionID)
 	if err != nil {
 		return err
 	}
 
 	if !found {
+		slog.WarnContext(ctx, "QR locations of the published revision are not found, keeping the previous ones",
+			"event_id", tenant.EventID, "revision_id", revisionID)
+
 		return nil
 	}
 
-	return s.readModel.SaveDisplayNames(ctx, names)
+	return s.readModel.SaveQrLocations(ctx, locations)
 }
 
 func (s *GuestReadModelService) reconcileStatus(ctx context.Context, eventID string) error {
