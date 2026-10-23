@@ -18,6 +18,7 @@ import (
 	"github.com/pj-hoakari/protoc-gen-authz-go/authz"
 
 	"github.com/pj-hoakari/tolo-guest/gen/tolo/guest/v1/guestv1connect"
+	"github.com/pj-hoakari/tolo-guest/internal/application"
 )
 
 // Defaults for verifying internal JWTs. The issuer is the Service Gateway's
@@ -49,7 +50,10 @@ func DefaultJWTSettings() JWTSettings {
 
 // RoutesWithJWTSettings builds the service routes that verify internal
 // JWTs against the JWKS the settings locate.
-func RoutesWithJWTSettings(settings JWTSettings) (func(mux *http.ServeMux), error) {
+func RoutesWithJWTSettings(
+	settings JWTSettings,
+	guestSettings application.GuestSettingsUseCases,
+) (func(mux *http.ServeMux), error) {
 	cache, err := jwks.New(jwks.Config{
 		URL:             settings.JWKSURL,
 		HTTPClient:      nil,
@@ -69,13 +73,16 @@ func RoutesWithJWTSettings(settings JWTSettings) (func(mux *http.ServeMux), erro
 		return nil, fmt.Errorf("create internal JWT verifier: %w", err)
 	}
 
-	return RoutesWithVerifier(tokenVerifier)
+	return RoutesWithVerifier(tokenVerifier, guestSettings)
 }
 
 // RoutesWithVerifier builds the service routes around a verifier of the
 // internal JWT. The services are guarded by one interceptor built from their
 // merged policy tables, so the credential rules stay declared in the proto.
-func RoutesWithVerifier(tokenVerifier interceptor.TokenVerifier) (func(mux *http.ServeMux), error) {
+func RoutesWithVerifier(
+	tokenVerifier interceptor.TokenVerifier,
+	guestSettings application.GuestSettingsUseCases,
+) (func(mux *http.ServeMux), error) {
 	// The caller sits behind the Service Gateway, so an incoming trace context is
 	// trusted and continued instead of being demoted to a span link.
 	tracing, err := otelconnect.NewServerInterceptor(otelconnect.WithTrustRemote())
@@ -105,7 +112,7 @@ func RoutesWithVerifier(tokenVerifier interceptor.TokenVerifier) (func(mux *http
 	// on the trace it belongs to.
 	server := connectrpc.NewServer(tracing, auth)
 	guestv1connect.RegisterGuestPageServiceHandler(server, NewGuestPageService())
-	guestv1connect.RegisterGuestSettingsServiceHandler(server, NewGuestSettingsService())
+	guestv1connect.RegisterGuestSettingsServiceHandler(server, NewGuestSettingsService(guestSettings))
 
 	return func(mux *http.ServeMux) {
 		connecthttp.Mount(mux, server)
