@@ -20,10 +20,12 @@ import (
 )
 
 const (
-	defaultAddr       = ":8080"
-	defaultLogLevel   = "info"
-	shutdownTimeout   = 10 * time.Second
-	readHeaderTimeout = 10 * time.Second
+	defaultAddr              = ":8080"
+	defaultLogLevel          = "info"
+	defaultReconcileInterval = 10 * time.Minute
+	upstreamTimeout          = 10 * time.Second
+	shutdownTimeout          = 10 * time.Second
+	readHeaderTimeout        = 10 * time.Second
 )
 
 func main() {
@@ -57,6 +59,25 @@ func run() error {
 		return errors.New("DATABASE_URL is required")
 	}
 
+	observationURL := os.Getenv("OBSERVATION_URL")
+	if observationURL == "" {
+		return errors.New("OBSERVATION_URL is required")
+	}
+
+	operationURL := os.Getenv("OPERATION_URL")
+	if operationURL == "" {
+		return errors.New("OPERATION_URL is required")
+	}
+
+	reconcileInterval, err := time.ParseDuration(getenv("RECONCILE_INTERVAL", defaultReconcileInterval.String()))
+	if err != nil {
+		return fmt.Errorf("read RECONCILE_INTERVAL: %w", err)
+	}
+
+	if reconcileInterval <= 0 {
+		return errors.New("RECONCILE_INTERVAL must be positive")
+	}
+
 	shutdownTracing, err := telemetry.Setup(ctx)
 	if err != nil {
 		return fmt.Errorf("setup tracing: %w", err)
@@ -77,9 +98,32 @@ func run() error {
 		}
 	}()
 
+	guestSettings := dbinfra.NewPostgresGuestSettingsRepository(db)
+	upstream := &http.Client{Timeout: upstreamTimeout}
+	readModel := application.NewGuestReadModelService(
+		dbinfra.NewPostgresGuestReadModelRepository(db),
+		guestSettings,
+		connectinfra.NewObservationClient(upstream, observationURL),
+		connectinfra.NewOperationClient(upstream, operationURL),
+	)
+
+	reconcileCtx, stopReconcile := context.WithCancel(ctx)
+	reconciled := make(chan struct{})
+
+	go func() {
+		defer close(reconciled)
+
+		readModel.RunReconciliation(reconcileCtx, reconcileInterval)
+	}()
+
+	defer func() {
+		stopReconcile()
+		<-reconciled
+	}()
+
 	serviceRoutes, err := connectinfra.RoutesWithJWTSettings(
 		jwtSettings,
-		application.NewGuestSettingsService(dbinfra.NewPostgresGuestSettingsRepository(db)),
+		application.NewGuestSettingsService(guestSettings),
 	)
 	if err != nil {
 		return fmt.Errorf("build handler: %w", err)
