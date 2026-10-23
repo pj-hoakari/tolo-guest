@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pj-hoakari/go-service-template/internal/logging"
-	"github.com/pj-hoakari/go-service-template/internal/telemetry"
+	"github.com/pj-hoakari/tolo-guest/internal/logging"
+	"github.com/pj-hoakari/tolo-guest/internal/telemetry"
 	"go.opentelemetry.io/otel"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace/noop"

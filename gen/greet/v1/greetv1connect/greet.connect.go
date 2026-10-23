@@ -7,7 +7,7 @@ package greetv1connect
 import (
 	connect "connectrpc.com/connect/v2"
 	context "context"
-	v1 "github.com/pj-hoakari/go-service-template/gen/greet/v1"
+	v1 "github.com/pj-hoakari/tolo-guest/gen/greet/v1"
 	sync "sync"
 )
 

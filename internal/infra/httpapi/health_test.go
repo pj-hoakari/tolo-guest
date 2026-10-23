@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/pj-hoakari/go-service-template/internal/infra/httpapi"
+	"github.com/pj-hoakari/tolo-guest/internal/infra/httpapi"
 )
 
 func TestHealthz(t *testing.T) {

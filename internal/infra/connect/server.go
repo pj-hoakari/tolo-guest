@@ -15,8 +15,8 @@ import (
 	"github.com/pj-hoakari/internal-jwt-handling/jwks"
 	"github.com/pj-hoakari/internal-jwt-handling/verifier"
 
-	"github.com/pj-hoakari/go-service-template/gen/greet/v1/greetv1connect"
-	"github.com/pj-hoakari/go-service-template/internal/application"
+	"github.com/pj-hoakari/tolo-guest/gen/greet/v1/greetv1connect"
+	"github.com/pj-hoakari/tolo-guest/internal/application"
 )
 
 // Defaults for verifying internal JWTs. The issuer is the Service Gateway's
@@ -25,7 +25,7 @@ import (
 const (
 	DefaultInternalJWKSURL     = "http://gateway:8080/.well-known/jwks.json"
 	DefaultInternalJWTIssuer   = "service-gateway"
-	DefaultInternalJWTAudience = "go-service-template"
+	DefaultInternalJWTAudience = "tolo-guest"
 )
 
 // JWTSettings locates the Service Gateway's JWKS and names the issuer and

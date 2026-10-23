@@ -3,9 +3,9 @@ package connect
 import (
 	"context"
 
-	greetv1 "github.com/pj-hoakari/go-service-template/gen/greet/v1"
-	"github.com/pj-hoakari/go-service-template/gen/greet/v1/greetv1connect"
-	"github.com/pj-hoakari/go-service-template/internal/application"
+	greetv1 "github.com/pj-hoakari/tolo-guest/gen/greet/v1"
+	"github.com/pj-hoakari/tolo-guest/gen/greet/v1/greetv1connect"
+	"github.com/pj-hoakari/tolo-guest/internal/application"
 )
 
 // Service is the Connect transport implementation of GreetService.

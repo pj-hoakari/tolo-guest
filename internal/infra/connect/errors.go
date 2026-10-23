@@ -7,7 +7,7 @@ import (
 
 	connectrpc "connectrpc.com/connect/v2"
 
-	"github.com/pj-hoakari/go-service-template/internal/domain"
+	"github.com/pj-hoakari/tolo-guest/internal/domain"
 )
 
 // errInternal is the only detail a client learns about an internal failure.
