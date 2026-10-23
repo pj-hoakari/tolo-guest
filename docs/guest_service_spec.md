@@ -28,13 +28,14 @@ URL（設置箇所×種類）がページ構成（コンポーネントの組み
 
 | RPC | 説明（ユビキタス言語） | 関連ドメインイベント |
 |---|---|---|
-| OpenGuestPage | 設置箇所・種類ごとに発行された URL の QR からゲスト用ページを開く（トークンなし）。`event_id`・`qr_location_id`・`kind` に対応するページ構成（コンポーネントの並び）を返し、ページを開くごとに設置箇所単位で1回の人数計上を行う（設定を保存していないイベントでは Observation へ送らない） | GuestPageOpened／GuestCountedViaQr |
+| OpenGuestPage | 設置箇所ごとに発行された URL の QR からゲスト用ページを開く（トークンなし）。`event_id`、`qr_location_id`、`session_id` を受け取り、GetQrLocations で取得した QR 設置箇所からその設置箇所の種類を引いて、種類に対応するページ構成（コンポーネントの並び）を返す。ページを開くごとに設置箇所単位で1回の人数計上を行う。同じイベント・設置箇所・`session_id` で30分以内に開き直した分と、`session_id` のない要求は計上しない（ページ構成は返す）。本サービスが知らない設置箇所では既定のページ構成を返し、計上しない | GuestPageOpened／GuestCountedViaQr |
 | GetCrowd、GetQueues、ListGuestMessages | コンポーネント API（混雑・行列・スタッフメッセージ）。ページを構成する各コンポーネントが個別に呼ぶ。いずれも自 DB の読み取りモデルのみで応答（外部問い合わせなし。表示名は本サービスが付与）。誘導提案は返さない | GuestSnapshotServed（ページ表示の単位で発生） |
 
 天候のコンポーネント API は後回しにし、入出力はまだ定義しない（`GuestComponent` に天候を含めない）
 
 設置箇所の正本はグラフ編集（QrLocation。管理 UI がグラフと同じ画面で管理）
-本サービスは GetQrLocations で pull して発行 URL（設置箇所×種類）を生成する。種類→ページ構成の対応は本サービスのイベント設定として保持し、`GuestSettingsService` で読み書きする
+本サービスは GetQrLocations で pull した QR 設置箇所ごとに、発行 URL を1つ生成する。パスは `/event/{event_id}/guest/{qr_location_id}` とする
+種類は QR 設置箇所の属性（QrLocation の `kind` は1つ）であるため、設置箇所×種類の発行 URL は設置箇所ごとに1つになる。種類→ページ構成の対応は本サービスのイベント設定として保持し、`GuestSettingsService` で読み書きする
 QR の動的化（時間で変わる偽造対策。RotatingQrRefreshed）は将来導入とし、当面は固定 URL
 サイネージ（SignageUpdated）も同じ読み取りモデル・コンポーネント API から描画する
 
@@ -44,6 +45,7 @@ QR の動的化（時間で変わる偽造対策。RotatingQrRefreshed）は将�
 |---|---|---|---|---|
 | GetGuestSettings | イベントのゲスト向け設定（種類→ページ構成）を返す | 管理 UI | `event_access` + events.read | （参照のみ） |
 | UpdateGuestSettings | イベントのゲスト向け設定（種類→ページ構成）を保存する。イベントの属するテナントは、保存時に `event_access` の `tenant_id` クレームから取る（リクエストには持たない） | 管理 UI | `event_access` + events.manage | — |
+| ListIssuedUrls | イベントの QR 設置箇所ごとに、設置箇所の ID・名称・種類と発行 URL のパスを返す。GetQrLocations で取得した QR 設置箇所から作る | 管理 UI | `event_access` + events.read | （参照のみ） |
 
 ### 呼び出す側
 
@@ -71,8 +73,10 @@ push は HTTP の受け口で受ける。受け口の形と応答の規約は se
 
 ## 補足
 
-- QR 由来の人数計上には、同一セッション・同一 IP からの連続計上を抑えるレート制限を設ける
-  QR は設置箇所ごとの固定 URL（トークンなし）であり、繰り返しアクセスによる水増しを防ぐ手段が他にないため。具体値は実装フェーズで決定
+- QR 由来の人数計上には、同一セッションからの連続計上を抑えるレート制限を設ける。同じイベント・設置箇所・`session_id` の開き直しは30分間計上しない
+  QR は設置箇所ごとの固定 URL（トークンなし）であり、繰り返しアクセスによる水増しを防ぐ手段が他にないため
+  セッションは、ゲスト用ページ（tolo-web）が生成して端末に保持し、OpenGuestPage に付けて送る `session_id` で識別する。クライアントの IP は使わない。IP は Service Gateway を越えて本サービスまで届かず、会場の NAT の内側にいる複数のゲストを1人と数えてしまうため
+  計上数は Observation の観測ウィンドウに合わせ、1分のウィンドウ（`window_start`／`window_end`）に区切って送る
 
 - 誘導提案は表示しない。提案（方向属性・境界制御・通行制限・行列形状）はスタッフ向けであり、ゲストへの誘導情報はスタッフのゲスト向けメッセージ（`guest-messages` トピック経由）のみで届く
   並び先案内・待ち時間は「案内」（局所行列誘導の区分）として QueueStatus に含まれ表示対象
@@ -92,12 +96,14 @@ push は HTTP の受け口で受ける。受け口の形と応答の規約は se
   表示名の取得契機（起動時・周期・未知 ID 検知時）の詳細は実装フェーズで決定
 - QR 設置箇所は GetDisplayNames の応答の `revision_id`（現在の公開版）を指定して GetQrLocations で取得する
   起動時と周期の GetDisplayNames の pull で、前回 GetQrLocations に使った版と異なる `revision_id` が返ったときに取り直す。版の取得や公開の通知のために別の RPC やイベントバスは設けない
+  Graph Authoring で設置箇所の種類を変えると、次の取り直しの後から、印刷済みの QR で開くページ構成も変わる
 - イベントの属するテナントは、本サービスがイベントの設定として保持する。`UpdateGuestSettings` で設定を保存するときに、`event_access` の内部 JWT の `tenant_id` クレームから取る
   QR 由来の計上を Observation へ送るとき、`event_id` と合わせて `tenant_id` に入れる（Observation）。Operation の `ListStaffMessages` と Graph Authoring の `GetQrLocations` でも同じく `tenant_id` に入れる（Operation、Graph Authoring）
   `token_use=service` の内部 JWT はテナントのクレームを持たないため、送り先がテナントを確定できるようにリクエストで渡す
   設定を保存するまでテナントは分からないため、`tenant_id` を要するこの3つの呼び出しは、そのイベントでは設定の保存後から始める。`tenant_id` を要さない `GetGuestSnapshot` と `GetDisplayNames` は設定の有無によらず呼ぶ
 - 設定を保存していないイベントは既定の設定で扱う。既定のページ構成は、QR の種類によらず混雑、行列、スタッフメッセージの3つをこの順に並べたものとする
-  設定を保存したイベントでも、要求された種類のページ構成がなければ既定のページ構成を返す
+  設定を保存したイベントでも、設置箇所の種類のページ構成がなければ既定のページ構成を返す
+  本サービスが知らない設置箇所（QR 設置箇所をまだ取得していないイベントの設置箇所や、取得した一覧にない `qr_location_id`）への OpenGuestPage も既定のページ構成を返す。計上には設置箇所とテナントが分かっている必要があるため、この場合は計上しない
   ゲスト向けの RPC は、設定の有無によらず読み取りモデルから応答する
 - 天候取得に使うイベント所在地は本サービスの設定として保持する（Tenant Management の Event には持たせない）
   所在地は天候のコンポーネント API とあわせてイベント設定に足す
