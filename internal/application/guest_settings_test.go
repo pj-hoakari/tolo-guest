@@ -3,6 +3,7 @@ package application_test
 import (
 	"context"
 	"errors"
+	"slices"
 	"testing"
 
 	"go.uber.org/mock/gomock"
@@ -32,9 +33,10 @@ func withEventToken(eventPublicID string) context.Context {
 func newGuestSettingsService(t *testing.T) (*application.GuestSettingsService, *MockGuestSettingsRepository) {
 	t.Helper()
 
-	settings := NewMockGuestSettingsRepository(gomock.NewController(t))
+	ctrl := gomock.NewController(t)
+	settings := NewMockGuestSettingsRepository(ctrl)
 
-	return application.NewGuestSettingsService(settings), settings
+	return application.NewGuestSettingsService(settings, NewMockGuestReadModelRepository(ctrl)), settings
 }
 
 func TestGetGuestSettings(t *testing.T) {
@@ -136,6 +138,81 @@ func TestUpdateGuestSettings(t *testing.T) {
 		})
 		if !errors.Is(err, tenantctx.ErrMismatch) {
 			t.Errorf("UpdateGuestSettings() error = %v, want %v", err, tenantctx.ErrMismatch)
+		}
+	})
+}
+
+func TestListIssuedURLs(t *testing.T) {
+	t.Parallel()
+
+	newService := func(t *testing.T) (*application.GuestSettingsService, *MockGuestReadModelRepository) {
+		t.Helper()
+
+		ctrl := gomock.NewController(t)
+		readModel := NewMockGuestReadModelRepository(ctrl)
+
+		return application.NewGuestSettingsService(NewMockGuestSettingsRepository(ctrl), readModel), readModel
+	}
+
+	t.Run("issues one path per QR location in the stored order", func(t *testing.T) {
+		t.Parallel()
+
+		service, readModel := newService(t)
+		readModel.EXPECT().FindQrLocations(gomock.Any(), testEventPublicID).Return(domain.QrLocations{
+			EventID:    testEventPublicID,
+			RevisionID: "rev-1",
+			Locations: []domain.QrLocation{
+				{QrLocationID: "qr-west", Name: "西門", Kind: "entrance"},
+				{QrLocationID: "qr/hall 1", Name: "ホール前", Kind: "queue"},
+			},
+		}, nil)
+
+		got, err := service.ListIssuedURLs(withEventToken(testEventPublicID), testEventPublicID)
+		if err != nil {
+			t.Fatalf("ListIssuedURLs() error = %v", err)
+		}
+
+		want := []domain.IssuedURL{
+			{QrLocationID: "qr-west", Name: "西門", Kind: "entrance", Path: "/event/" + testEventPublicID + "/guest/qr-west"},
+			{QrLocationID: "qr/hall 1", Name: "ホール前", Kind: "queue", Path: "/event/" + testEventPublicID + "/guest/qr%2Fhall%201"},
+		}
+		if !slices.Equal(got, want) {
+			t.Errorf("ListIssuedURLs() = %+v, want %+v", got, want)
+		}
+	})
+
+	t.Run("answers no URLs for an event whose QR locations are not pulled yet", func(t *testing.T) {
+		t.Parallel()
+
+		service, readModel := newService(t)
+		readModel.EXPECT().FindQrLocations(gomock.Any(), testEventPublicID).Return(domain.QrLocations{}, repository.ErrQrLocationsNotFound)
+
+		got, err := service.ListIssuedURLs(withEventToken(testEventPublicID), testEventPublicID)
+		if err != nil || len(got) != 0 {
+			t.Errorf("ListIssuedURLs() = %+v, %v, want no URLs without error", got, err)
+		}
+	})
+
+	t.Run("rejects a token for another event before reading", func(t *testing.T) {
+		t.Parallel()
+
+		service, _ := newService(t)
+
+		_, err := service.ListIssuedURLs(withEventToken(otherEventPublicID), testEventPublicID)
+		if !errors.Is(err, tenantctx.ErrEventMismatch) {
+			t.Errorf("ListIssuedURLs() error = %v, want %v", err, tenantctx.ErrEventMismatch)
+		}
+	})
+
+	t.Run("reports a failed read", func(t *testing.T) {
+		t.Parallel()
+
+		service, readModel := newService(t)
+		unavailable := errors.New("database unavailable")
+		readModel.EXPECT().FindQrLocations(gomock.Any(), testEventPublicID).Return(domain.QrLocations{}, unavailable)
+
+		if _, err := service.ListIssuedURLs(withEventToken(testEventPublicID), testEventPublicID); !errors.Is(err, unavailable) {
+			t.Errorf("ListIssuedURLs() error = %v, want %v", err, unavailable)
 		}
 	})
 }

@@ -42,6 +42,9 @@ const (
 	// GuestSettingsServiceUpdateGuestSettingsProcedure is the procedure name of the
 	// GuestSettingsService's UpdateGuestSettings RPC.
 	GuestSettingsServiceUpdateGuestSettingsProcedure = "/tolo.guest.v1.GuestSettingsService/UpdateGuestSettings"
+	// GuestSettingsServiceListIssuedUrlsProcedure is the procedure name of the GuestSettingsService's
+	// ListIssuedUrls RPC.
+	GuestSettingsServiceListIssuedUrlsProcedure = "/tolo.guest.v1.GuestSettingsService/ListIssuedUrls"
 )
 
 var (
@@ -229,12 +232,20 @@ var (
 			Procedure:  GuestSettingsServiceUpdateGuestSettingsProcedure,
 		}
 	})
+	guestSettingsServiceListIssuedUrlsSpec = sync.OnceValue(func() connect.Spec {
+		return connect.Spec{
+			StreamType: connect.StreamTypeUnary,
+			Schema:     v1.File_tolo_guest_v1_guest_proto.Services().ByName("GuestSettingsService").Methods().ByName("ListIssuedUrls"),
+			Procedure:  GuestSettingsServiceListIssuedUrlsProcedure,
+		}
+	})
 )
 
 // GuestSettingsServiceClient is a client for the tolo.guest.v1.GuestSettingsService service.
 type GuestSettingsServiceClient interface {
 	GetGuestSettings(context.Context, *v1.GetGuestSettingsRequest) (*v1.GuestSettings, error)
 	UpdateGuestSettings(context.Context, *v1.UpdateGuestSettingsRequest) (*v1.GuestSettings, error)
+	ListIssuedUrls(context.Context, *v1.ListIssuedUrlsRequest) (*v1.ListIssuedUrlsResponse, error)
 }
 
 // NewGuestSettingsServiceClient constructs a client for the tolo.guest.v1.GuestSettingsService
@@ -248,6 +259,7 @@ func NewGuestSettingsServiceClient(client *connect.Client) GuestSettingsServiceC
 type GuestSettingsServiceHandler interface {
 	GetGuestSettings(context.Context, *v1.GetGuestSettingsRequest) (*v1.GuestSettings, error)
 	UpdateGuestSettings(context.Context, *v1.UpdateGuestSettingsRequest) (*v1.GuestSettings, error)
+	ListIssuedUrls(context.Context, *v1.ListIssuedUrlsRequest) (*v1.ListIssuedUrlsResponse, error)
 }
 
 // RegisterGuestSettingsServiceHandler registers svc as the tolo.guest.v1.GuestSettingsService
@@ -257,6 +269,7 @@ func RegisterGuestSettingsServiceHandler(server *connect.Server, svc GuestSettin
 	server.Register(
 		connect.Method{Spec: guestSettingsServiceGetGuestSettingsSpec(), Handler: adapter.getGuestSettings},
 		connect.Method{Spec: guestSettingsServiceUpdateGuestSettingsSpec(), Handler: adapter.updateGuestSettings},
+		connect.Method{Spec: guestSettingsServiceListIssuedUrlsSpec(), Handler: adapter.listIssuedUrls},
 	)
 }
 
@@ -269,6 +282,10 @@ func (UnimplementedGuestSettingsServiceHandler) GetGuestSettings(context.Context
 
 func (UnimplementedGuestSettingsServiceHandler) UpdateGuestSettings(context.Context, *v1.UpdateGuestSettingsRequest) (*v1.GuestSettings, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, "tolo.guest.v1.GuestSettingsService.UpdateGuestSettings is not implemented")
+}
+
+func (UnimplementedGuestSettingsServiceHandler) ListIssuedUrls(context.Context, *v1.ListIssuedUrlsRequest) (*v1.ListIssuedUrlsResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, "tolo.guest.v1.GuestSettingsService.ListIssuedUrls is not implemented")
 }
 
 type guestSettingsServiceClient struct {
@@ -286,6 +303,14 @@ func (c *guestSettingsServiceClient) GetGuestSettings(ctx context.Context, req *
 func (c *guestSettingsServiceClient) UpdateGuestSettings(ctx context.Context, req *v1.UpdateGuestSettingsRequest) (*v1.GuestSettings, error) {
 	var res v1.GuestSettings
 	if err := c.client.CallUnary(ctx, guestSettingsServiceUpdateGuestSettingsSpec(), req, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+func (c *guestSettingsServiceClient) ListIssuedUrls(ctx context.Context, req *v1.ListIssuedUrlsRequest) (*v1.ListIssuedUrlsResponse, error) {
+	var res v1.ListIssuedUrlsResponse
+	if err := c.client.CallUnary(ctx, guestSettingsServiceListIssuedUrlsSpec(), req, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -311,6 +336,18 @@ func (h guestSettingsServiceHandler) updateGuestSettings(ctx context.Context, _ 
 		return err
 	}
 	res, err := h.svc.UpdateGuestSettings(ctx, &req)
+	if err != nil {
+		return err
+	}
+	return stream.Send(res)
+}
+
+func (h guestSettingsServiceHandler) listIssuedUrls(ctx context.Context, _ connect.Spec, stream connect.ServerStream) error {
+	var req v1.ListIssuedUrlsRequest
+	if err := stream.Receive(&req); err != nil {
+		return err
+	}
+	res, err := h.svc.ListIssuedUrls(ctx, &req)
 	if err != nil {
 		return err
 	}

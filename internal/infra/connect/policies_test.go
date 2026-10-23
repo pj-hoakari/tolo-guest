@@ -24,6 +24,7 @@ func TestGeneratedPoliciesMatchTheSpecification(t *testing.T) {
 		guestv1connect.GuestPageServiceListGuestMessagesProcedure:       public,
 		guestv1connect.GuestSettingsServiceGetGuestSettingsProcedure:    eventAccess("events.read"),
 		guestv1connect.GuestSettingsServiceUpdateGuestSettingsProcedure: eventAccess("events.manage"),
+		guestv1connect.GuestSettingsServiceListIssuedUrlsProcedure:      eventAccess("events.read"),
 	}
 
 	got, err := authz.Merge(

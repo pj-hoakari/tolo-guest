@@ -131,7 +131,6 @@ type OpenGuestPageRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
 	QrLocationId  string                 `protobuf:"bytes,2,opt,name=qr_location_id,json=qrLocationId,proto3" json:"qr_location_id,omitempty"`
-	Kind          string                 `protobuf:"bytes,3,opt,name=kind,proto3" json:"kind,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -176,13 +175,6 @@ func (x *OpenGuestPageRequest) GetEventId() string {
 func (x *OpenGuestPageRequest) GetQrLocationId() string {
 	if x != nil {
 		return x.QrLocationId
-	}
-	return ""
-}
-
-func (x *OpenGuestPageRequest) GetKind() string {
-	if x != nil {
-		return x.Kind
 	}
 	return ""
 }
@@ -1029,15 +1021,170 @@ func (x *PageComposition) GetComponents() []GuestComponent {
 	return nil
 }
 
+type ListIssuedUrlsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListIssuedUrlsRequest) Reset() {
+	*x = ListIssuedUrlsRequest{}
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListIssuedUrlsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListIssuedUrlsRequest) ProtoMessage() {}
+
+func (x *ListIssuedUrlsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListIssuedUrlsRequest.ProtoReflect.Descriptor instead.
+func (*ListIssuedUrlsRequest) Descriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *ListIssuedUrlsRequest) GetEventId() string {
+	if x != nil {
+		return x.EventId
+	}
+	return ""
+}
+
+type ListIssuedUrlsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IssuedUrls    []*IssuedUrl           `protobuf:"bytes,1,rep,name=issued_urls,json=issuedUrls,proto3" json:"issued_urls,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListIssuedUrlsResponse) Reset() {
+	*x = ListIssuedUrlsResponse{}
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListIssuedUrlsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListIssuedUrlsResponse) ProtoMessage() {}
+
+func (x *ListIssuedUrlsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListIssuedUrlsResponse.ProtoReflect.Descriptor instead.
+func (*ListIssuedUrlsResponse) Descriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *ListIssuedUrlsResponse) GetIssuedUrls() []*IssuedUrl {
+	if x != nil {
+		return x.IssuedUrls
+	}
+	return nil
+}
+
+type IssuedUrl struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	QrLocationId  string                 `protobuf:"bytes,1,opt,name=qr_location_id,json=qrLocationId,proto3" json:"qr_location_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Kind          string                 `protobuf:"bytes,3,opt,name=kind,proto3" json:"kind,omitempty"`
+	Path          string                 `protobuf:"bytes,4,opt,name=path,proto3" json:"path,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IssuedUrl) Reset() {
+	*x = IssuedUrl{}
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IssuedUrl) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IssuedUrl) ProtoMessage() {}
+
+func (x *IssuedUrl) ProtoReflect() protoreflect.Message {
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IssuedUrl.ProtoReflect.Descriptor instead.
+func (*IssuedUrl) Descriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *IssuedUrl) GetQrLocationId() string {
+	if x != nil {
+		return x.QrLocationId
+	}
+	return ""
+}
+
+func (x *IssuedUrl) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *IssuedUrl) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *IssuedUrl) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
 var File_tolo_guest_v1_guest_proto protoreflect.FileDescriptor
 
 const file_tolo_guest_v1_guest_proto_rawDesc = "" +
 	"\n" +
-	"\x19tolo/guest/v1/guest.proto\x12\rtolo.guest.v1\x1a\x16authz/v1/options.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"k\n" +
+	"\x19tolo/guest/v1/guest.proto\x12\rtolo.guest.v1\x1a\x16authz/v1/options.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"c\n" +
 	"\x14OpenGuestPageRequest\x12\x19\n" +
 	"\bevent_id\x18\x01 \x01(\tR\aeventId\x12$\n" +
-	"\x0eqr_location_id\x18\x02 \x01(\tR\fqrLocationId\x12\x12\n" +
-	"\x04kind\x18\x03 \x01(\tR\x04kind\"V\n" +
+	"\x0eqr_location_id\x18\x02 \x01(\tR\fqrLocationIdJ\x04\b\x03\x10\x04R\x04kind\"V\n" +
 	"\x15OpenGuestPageResponse\x12=\n" +
 	"\n" +
 	"components\x18\x01 \x03(\x0e2\x1d.tolo.guest.v1.GuestComponentR\n" +
@@ -1092,7 +1239,17 @@ const file_tolo_guest_v1_guest_proto_rawDesc = "" +
 	"\x04kind\x18\x01 \x01(\tR\x04kind\x12=\n" +
 	"\n" +
 	"components\x18\x02 \x03(\x0e2\x1d.tolo.guest.v1.GuestComponentR\n" +
-	"components*\x8c\x01\n" +
+	"components\"2\n" +
+	"\x15ListIssuedUrlsRequest\x12\x19\n" +
+	"\bevent_id\x18\x01 \x01(\tR\aeventId\"S\n" +
+	"\x16ListIssuedUrlsResponse\x129\n" +
+	"\vissued_urls\x18\x01 \x03(\v2\x18.tolo.guest.v1.IssuedUrlR\n" +
+	"issuedUrls\"m\n" +
+	"\tIssuedUrl\x12$\n" +
+	"\x0eqr_location_id\x18\x01 \x01(\tR\fqrLocationId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
+	"\x04kind\x18\x03 \x01(\tR\x04kind\x12\x12\n" +
+	"\x04path\x18\x04 \x01(\tR\x04path*\x8c\x01\n" +
 	"\x0eGuestComponent\x12\x1f\n" +
 	"\x1bGUEST_COMPONENT_UNSPECIFIED\x10\x00\x12\x19\n" +
 	"\x15GUEST_COMPONENT_CROWD\x10\x01\x12\x1a\n" +
@@ -1108,10 +1265,11 @@ const file_tolo_guest_v1_guest_proto_rawDesc = "" +
 	"\rOpenGuestPage\x12#.tolo.guest.v1.OpenGuestPageRequest\x1a$.tolo.guest.v1.OpenGuestPageResponse\"\x06\x8a\xb5\x18\x02\b\x01\x12S\n" +
 	"\bGetCrowd\x12\x1e.tolo.guest.v1.GetCrowdRequest\x1a\x1f.tolo.guest.v1.GetCrowdResponse\"\x06\x8a\xb5\x18\x02\b\x01\x12V\n" +
 	"\tGetQueues\x12\x1f.tolo.guest.v1.GetQueuesRequest\x1a .tolo.guest.v1.GetQueuesResponse\"\x06\x8a\xb5\x18\x02\b\x01\x12n\n" +
-	"\x11ListGuestMessages\x12'.tolo.guest.v1.ListGuestMessagesRequest\x1a(.tolo.guest.v1.ListGuestMessagesResponse\"\x06\x8a\xb5\x18\x02\b\x012\x99\x02\n" +
+	"\x11ListGuestMessages\x12'.tolo.guest.v1.ListGuestMessagesRequest\x1a(.tolo.guest.v1.ListGuestMessagesResponse\"\x06\x8a\xb5\x18\x02\b\x012\x9c\x03\n" +
 	"\x14GuestSettingsService\x12{\n" +
 	"\x10GetGuestSettings\x12&.tolo.guest.v1.GetGuestSettingsRequest\x1a\x1c.tolo.guest.v1.GuestSettings\"!\x8a\xb5\x18\x1d\b\x02\x12\vevents.read\x1a\fevent_access\x12\x83\x01\n" +
-	"\x13UpdateGuestSettings\x12).tolo.guest.v1.UpdateGuestSettingsRequest\x1a\x1c.tolo.guest.v1.GuestSettings\"#\x8a\xb5\x18\x1f\b\x02\x12\revents.manage\x1a\fevent_accessB\xb1\x01\n" +
+	"\x13UpdateGuestSettings\x12).tolo.guest.v1.UpdateGuestSettingsRequest\x1a\x1c.tolo.guest.v1.GuestSettings\"#\x8a\xb5\x18\x1f\b\x02\x12\revents.manage\x1a\fevent_access\x12\x80\x01\n" +
+	"\x0eListIssuedUrls\x12$.tolo.guest.v1.ListIssuedUrlsRequest\x1a%.tolo.guest.v1.ListIssuedUrlsResponse\"!\x8a\xb5\x18\x1d\b\x02\x12\vevents.read\x1a\fevent_accessB\xb1\x01\n" +
 	"\x11com.tolo.guest.v1B\n" +
 	"GuestProtoP\x01Z:github.com/pj-hoakari/tolo-guest/gen/tolo/guest/v1;guestv1\xa2\x02\x03TGX\xaa\x02\rTolo.Guest.V1\xca\x02\rTolo\\Guest\\V1\xe2\x02\x19Tolo\\Guest\\V1\\GPBMetadata\xea\x02\x0fTolo::Guest::V1b\x06proto3"
 
@@ -1128,7 +1286,7 @@ func file_tolo_guest_v1_guest_proto_rawDescGZIP() []byte {
 }
 
 var file_tolo_guest_v1_guest_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_tolo_guest_v1_guest_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_tolo_guest_v1_guest_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_tolo_guest_v1_guest_proto_goTypes = []any{
 	(GuestComponent)(0),                // 0: tolo.guest.v1.GuestComponent
 	(CrowdLevel)(0),                    // 1: tolo.guest.v1.CrowdLevel
@@ -1148,38 +1306,44 @@ var file_tolo_guest_v1_guest_proto_goTypes = []any{
 	(*UpdateGuestSettingsRequest)(nil), // 15: tolo.guest.v1.UpdateGuestSettingsRequest
 	(*GuestSettings)(nil),              // 16: tolo.guest.v1.GuestSettings
 	(*PageComposition)(nil),            // 17: tolo.guest.v1.PageComposition
-	(*timestamppb.Timestamp)(nil),      // 18: google.protobuf.Timestamp
+	(*ListIssuedUrlsRequest)(nil),      // 18: tolo.guest.v1.ListIssuedUrlsRequest
+	(*ListIssuedUrlsResponse)(nil),     // 19: tolo.guest.v1.ListIssuedUrlsResponse
+	(*IssuedUrl)(nil),                  // 20: tolo.guest.v1.IssuedUrl
+	(*timestamppb.Timestamp)(nil),      // 21: google.protobuf.Timestamp
 }
 var file_tolo_guest_v1_guest_proto_depIdxs = []int32{
 	0,  // 0: tolo.guest.v1.OpenGuestPageResponse.components:type_name -> tolo.guest.v1.GuestComponent
-	18, // 1: tolo.guest.v1.GetCrowdResponse.taken_at:type_name -> google.protobuf.Timestamp
+	21, // 1: tolo.guest.v1.GetCrowdResponse.taken_at:type_name -> google.protobuf.Timestamp
 	6,  // 2: tolo.guest.v1.GetCrowdResponse.crowd:type_name -> tolo.guest.v1.Crowd
 	1,  // 3: tolo.guest.v1.Crowd.level:type_name -> tolo.guest.v1.CrowdLevel
-	18, // 4: tolo.guest.v1.GetQueuesResponse.taken_at:type_name -> google.protobuf.Timestamp
+	21, // 4: tolo.guest.v1.GetQueuesResponse.taken_at:type_name -> google.protobuf.Timestamp
 	9,  // 5: tolo.guest.v1.GetQueuesResponse.queues:type_name -> tolo.guest.v1.Queue
 	10, // 6: tolo.guest.v1.Queue.gates:type_name -> tolo.guest.v1.QueueGate
 	13, // 7: tolo.guest.v1.ListGuestMessagesResponse.messages:type_name -> tolo.guest.v1.GuestMessage
-	18, // 8: tolo.guest.v1.GuestMessage.sent_at:type_name -> google.protobuf.Timestamp
+	21, // 8: tolo.guest.v1.GuestMessage.sent_at:type_name -> google.protobuf.Timestamp
 	17, // 9: tolo.guest.v1.UpdateGuestSettingsRequest.page_compositions:type_name -> tolo.guest.v1.PageComposition
 	17, // 10: tolo.guest.v1.GuestSettings.page_compositions:type_name -> tolo.guest.v1.PageComposition
 	0,  // 11: tolo.guest.v1.PageComposition.components:type_name -> tolo.guest.v1.GuestComponent
-	2,  // 12: tolo.guest.v1.GuestPageService.OpenGuestPage:input_type -> tolo.guest.v1.OpenGuestPageRequest
-	4,  // 13: tolo.guest.v1.GuestPageService.GetCrowd:input_type -> tolo.guest.v1.GetCrowdRequest
-	7,  // 14: tolo.guest.v1.GuestPageService.GetQueues:input_type -> tolo.guest.v1.GetQueuesRequest
-	11, // 15: tolo.guest.v1.GuestPageService.ListGuestMessages:input_type -> tolo.guest.v1.ListGuestMessagesRequest
-	14, // 16: tolo.guest.v1.GuestSettingsService.GetGuestSettings:input_type -> tolo.guest.v1.GetGuestSettingsRequest
-	15, // 17: tolo.guest.v1.GuestSettingsService.UpdateGuestSettings:input_type -> tolo.guest.v1.UpdateGuestSettingsRequest
-	3,  // 18: tolo.guest.v1.GuestPageService.OpenGuestPage:output_type -> tolo.guest.v1.OpenGuestPageResponse
-	5,  // 19: tolo.guest.v1.GuestPageService.GetCrowd:output_type -> tolo.guest.v1.GetCrowdResponse
-	8,  // 20: tolo.guest.v1.GuestPageService.GetQueues:output_type -> tolo.guest.v1.GetQueuesResponse
-	12, // 21: tolo.guest.v1.GuestPageService.ListGuestMessages:output_type -> tolo.guest.v1.ListGuestMessagesResponse
-	16, // 22: tolo.guest.v1.GuestSettingsService.GetGuestSettings:output_type -> tolo.guest.v1.GuestSettings
-	16, // 23: tolo.guest.v1.GuestSettingsService.UpdateGuestSettings:output_type -> tolo.guest.v1.GuestSettings
-	18, // [18:24] is the sub-list for method output_type
-	12, // [12:18] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	20, // 12: tolo.guest.v1.ListIssuedUrlsResponse.issued_urls:type_name -> tolo.guest.v1.IssuedUrl
+	2,  // 13: tolo.guest.v1.GuestPageService.OpenGuestPage:input_type -> tolo.guest.v1.OpenGuestPageRequest
+	4,  // 14: tolo.guest.v1.GuestPageService.GetCrowd:input_type -> tolo.guest.v1.GetCrowdRequest
+	7,  // 15: tolo.guest.v1.GuestPageService.GetQueues:input_type -> tolo.guest.v1.GetQueuesRequest
+	11, // 16: tolo.guest.v1.GuestPageService.ListGuestMessages:input_type -> tolo.guest.v1.ListGuestMessagesRequest
+	14, // 17: tolo.guest.v1.GuestSettingsService.GetGuestSettings:input_type -> tolo.guest.v1.GetGuestSettingsRequest
+	15, // 18: tolo.guest.v1.GuestSettingsService.UpdateGuestSettings:input_type -> tolo.guest.v1.UpdateGuestSettingsRequest
+	18, // 19: tolo.guest.v1.GuestSettingsService.ListIssuedUrls:input_type -> tolo.guest.v1.ListIssuedUrlsRequest
+	3,  // 20: tolo.guest.v1.GuestPageService.OpenGuestPage:output_type -> tolo.guest.v1.OpenGuestPageResponse
+	5,  // 21: tolo.guest.v1.GuestPageService.GetCrowd:output_type -> tolo.guest.v1.GetCrowdResponse
+	8,  // 22: tolo.guest.v1.GuestPageService.GetQueues:output_type -> tolo.guest.v1.GetQueuesResponse
+	12, // 23: tolo.guest.v1.GuestPageService.ListGuestMessages:output_type -> tolo.guest.v1.ListGuestMessagesResponse
+	16, // 24: tolo.guest.v1.GuestSettingsService.GetGuestSettings:output_type -> tolo.guest.v1.GuestSettings
+	16, // 25: tolo.guest.v1.GuestSettingsService.UpdateGuestSettings:output_type -> tolo.guest.v1.GuestSettings
+	19, // 26: tolo.guest.v1.GuestSettingsService.ListIssuedUrls:output_type -> tolo.guest.v1.ListIssuedUrlsResponse
+	20, // [20:27] is the sub-list for method output_type
+	13, // [13:20] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_tolo_guest_v1_guest_proto_init() }
@@ -1197,7 +1361,7 @@ func file_tolo_guest_v1_guest_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_tolo_guest_v1_guest_proto_rawDesc), len(file_tolo_guest_v1_guest_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   16,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

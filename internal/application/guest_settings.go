@@ -20,14 +20,19 @@ type UpdateGuestSettingsInput struct {
 type GuestSettingsUseCases interface {
 	GetGuestSettings(ctx context.Context, eventID string) (domain.GuestSettings, error)
 	UpdateGuestSettings(ctx context.Context, input UpdateGuestSettingsInput) (domain.GuestSettings, error)
+	ListIssuedURLs(ctx context.Context, eventID string) ([]domain.IssuedURL, error)
 }
 
 type GuestSettingsService struct {
-	settings repository.GuestSettingsRepository
+	settings  repository.GuestSettingsRepository
+	readModel repository.GuestReadModelRepository
 }
 
-func NewGuestSettingsService(settings repository.GuestSettingsRepository) *GuestSettingsService {
-	return &GuestSettingsService{settings: settings}
+func NewGuestSettingsService(
+	settings repository.GuestSettingsRepository,
+	readModel repository.GuestReadModelRepository,
+) *GuestSettingsService {
+	return &GuestSettingsService{settings: settings, readModel: readModel}
 }
 
 func (s *GuestSettingsService) GetGuestSettings(ctx context.Context, eventID string) (domain.GuestSettings, error) {
@@ -61,6 +66,23 @@ func (s *GuestSettingsService) UpdateGuestSettings(
 	}
 
 	return settings, nil
+}
+
+func (s *GuestSettingsService) ListIssuedURLs(ctx context.Context, eventID string) ([]domain.IssuedURL, error) {
+	if err := tenantctx.EnsureEvent(ctx, eventID); err != nil {
+		return nil, err
+	}
+
+	locations, err := s.readModel.FindQrLocations(ctx, eventID)
+	if errors.Is(err, repository.ErrQrLocationsNotFound) {
+		return []domain.IssuedURL{}, nil
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("find QR locations: %w", err)
+	}
+
+	return locations.IssuedURLs(), nil
 }
 
 func findGuestSettings(

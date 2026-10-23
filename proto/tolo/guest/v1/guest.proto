@@ -35,6 +35,13 @@ service GuestSettingsService {
       token_uses: "event_access"
     };
   }
+  rpc ListIssuedUrls(ListIssuedUrlsRequest) returns (ListIssuedUrlsResponse) {
+    option (authz.v1.auth_policy) = {
+      level: AUTH_LEVEL_AUTHENTICATED
+      required_scopes: "events.read"
+      token_uses: "event_access"
+    };
+  }
 }
 
 enum GuestComponent {
@@ -54,7 +61,8 @@ enum CrowdLevel {
 message OpenGuestPageRequest {
   string event_id = 1;
   string qr_location_id = 2;
-  string kind = 3;
+  reserved 3;
+  reserved "kind";
 }
 
 message OpenGuestPageResponse {
@@ -136,4 +144,19 @@ message GuestSettings {
 message PageComposition {
   string kind = 1;
   repeated GuestComponent components = 2;
+}
+
+message ListIssuedUrlsRequest {
+  string event_id = 1;
+}
+
+message ListIssuedUrlsResponse {
+  repeated IssuedUrl issued_urls = 1;
+}
+
+message IssuedUrl {
+  string qr_location_id = 1;
+  string name = 2;
+  string kind = 3;
+  string path = 4;
 }

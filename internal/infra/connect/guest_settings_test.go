@@ -2,12 +2,14 @@ package connect
 
 import (
 	"context"
+	"net/http"
 	"slices"
 	"sync"
 	"testing"
 	"time"
 
 	connectrpc "connectrpc.com/connect/v2"
+	"google.golang.org/protobuf/proto"
 
 	internaljwt "github.com/pj-hoakari/internal-jwt-handling"
 	"github.com/pj-hoakari/internal-jwt-handling/jwtgen"
@@ -27,7 +29,7 @@ type memoryGuestSettings struct {
 }
 
 func newGuestSettingsUseCases() *application.GuestSettingsService {
-	return application.NewGuestSettingsService(&memoryGuestSettings{byEvent: map[string]domain.GuestSettings{}})
+	return application.NewGuestSettingsService(&memoryGuestSettings{byEvent: map[string]domain.GuestSettings{}}, newMemoryReadModel())
 }
 
 func (m *memoryGuestSettings) Find(_ context.Context, eventID string) (domain.GuestSettings, error) {
@@ -193,5 +195,107 @@ func TestGuestSettings(t *testing.T) {
 		}
 
 		assertCompositions(t, "stored", get(t, testEventPublicID), testEventPublicID, stored)
+	})
+}
+
+func TestListIssuedUrls(t *testing.T) {
+	t.Parallel()
+
+	generator, err := jwtgen.NewGenerator("issued-urls-key")
+	if err != nil {
+		t.Fatalf("create token generator: %v", err)
+	}
+
+	keys, err := generator.JWKS()
+	if err != nil {
+		t.Fatalf("publish signing keys: %v", err)
+	}
+
+	readModel := newMemoryReadModel()
+	_ = readModel.SaveQrLocations(context.Background(), domain.QrLocations{
+		EventID:    testEventPublicID,
+		RevisionID: "rev-1",
+		Locations: []domain.QrLocation{
+			{QrLocationID: "qr-west", Name: "西門", Kind: "entrance"},
+			{QrLocationID: "qr/hall 1", Name: "ホール前", Kind: "queue"},
+		},
+	})
+
+	routes, err := RoutesWithVerifier(
+		newTestVerifier(t, keys),
+		application.NewGuestSettingsService(&memoryGuestSettings{byEvent: map[string]domain.GuestSettings{}}, readModel),
+		newGuestPageUseCases(readModel),
+	)
+	if err != nil {
+		t.Fatalf("RoutesWithVerifier() error = %v", err)
+	}
+
+	mux := http.NewServeMux()
+	routes(mux)
+
+	client := guestv1connect.NewGuestSettingsServiceClient(newClient(newTestServer(t, mux)))
+
+	list := func(t *testing.T, tokenEventID, scope, eventID string) (*guestv1.ListIssuedUrlsResponse, error) {
+		t.Helper()
+
+		output, err := generator.Generate(jwtgen.Config{
+			Issuer:         DefaultInternalJWTIssuer,
+			Audience:       DefaultInternalJWTAudience,
+			TokenUse:       internaljwt.TokenUseEventAccess,
+			Subject:        testSubject,
+			TenantPublicID: testTenantPublicID,
+			EventPublicID:  tokenEventID,
+			Scope:          scope,
+			TTL:            time.Hour,
+		})
+		if err != nil {
+			t.Fatalf("mint %s token: %v", scope, err)
+		}
+
+		return client.ListIssuedUrls(authorized("Bearer "+output.Token), &guestv1.ListIssuedUrlsRequest{EventId: eventID})
+	}
+
+	t.Run("issues one percent-encoded path per QR location in the stored order", func(t *testing.T) {
+		t.Parallel()
+
+		got, err := list(t, testEventPublicID, "events.read", testEventPublicID)
+		if err != nil {
+			t.Fatalf("ListIssuedUrls() error = %v", err)
+		}
+
+		want := &guestv1.ListIssuedUrlsResponse{IssuedUrls: []*guestv1.IssuedUrl{
+			{QrLocationId: "qr-west", Name: "西門", Kind: "entrance", Path: "/event/" + testEventPublicID + "/guest/qr-west"},
+			{QrLocationId: "qr/hall 1", Name: "ホール前", Kind: "queue", Path: "/event/" + testEventPublicID + "/guest/qr%2Fhall%201"},
+		}}
+		if !proto.Equal(got, want) {
+			t.Errorf("ListIssuedUrls() = %v, want %v", got, want)
+		}
+	})
+
+	t.Run("answers no URLs for an event whose QR locations are not pulled yet", func(t *testing.T) {
+		t.Parallel()
+
+		got, err := list(t, otherEventPublicID, "events.read", otherEventPublicID)
+		if err != nil || len(got.GetIssuedUrls()) != 0 {
+			t.Errorf("ListIssuedUrls() = %v, %v, want no URLs without error", got, err)
+		}
+	})
+
+	t.Run("rejects a token without events.read", func(t *testing.T) {
+		t.Parallel()
+
+		_, err := list(t, testEventPublicID, "events.manage", testEventPublicID)
+		if got := connectrpc.CodeOf(err); got != connectrpc.CodePermissionDenied {
+			t.Errorf("code = %v, want %v (error %v)", got, connectrpc.CodePermissionDenied, err)
+		}
+	})
+
+	t.Run("rejects a token for another event", func(t *testing.T) {
+		t.Parallel()
+
+		_, err := list(t, otherEventPublicID, "events.read", testEventPublicID)
+		if got := connectrpc.CodeOf(err); got != connectrpc.CodePermissionDenied {
+			t.Errorf("code = %v, want %v (error %v)", got, connectrpc.CodePermissionDenied, err)
+		}
 	})
 }
