@@ -12,13 +12,16 @@ import (
 )
 
 type GuestPageUseCases interface {
-	OpenGuestPage(ctx context.Context, eventID, qrLocationID string) ([]domain.Component, error)
+	OpenGuestPage(ctx context.Context, eventID, qrLocationID, sessionID string) ([]domain.Component, error)
 	GetCrowd(ctx context.Context, eventID, language string) (domain.CrowdView, error)
 	GetQueues(ctx context.Context, eventID, language string) (domain.QueuesView, error)
 	ListGuestMessages(ctx context.Context, eventID string) ([]domain.GuestMessage, error)
 }
 
-func (s *GuestReadModelService) OpenGuestPage(ctx context.Context, eventID, qrLocationID string) ([]domain.Component, error) {
+func (s *GuestReadModelService) OpenGuestPage(
+	ctx context.Context,
+	eventID, qrLocationID, sessionID string,
+) ([]domain.Component, error) {
 	if eventID == "" {
 		return nil, domain.ErrEventIDRequired
 	}
@@ -46,7 +49,7 @@ func (s *GuestReadModelService) OpenGuestPage(ctx context.Context, eventID, qrLo
 		return nil, err
 	}
 
-	if settings.TenantPublicID != "" {
+	if settings.TenantPublicID != "" && s.qrOpens.Allow(eventID, qrLocationID, sessionID) {
 		access := domain.QrAccess{EventID: eventID, QrLocationID: qrLocationID, TenantPublicID: settings.TenantPublicID}
 		if err := s.qrAccesses.RecordQrAccess(ctx, access); err != nil {
 			slog.ErrorContext(ctx, "record QR access failed", "event_id", eventID, "qr_location_id", qrLocationID, "error", err)

@@ -42,7 +42,7 @@ func (s *GuestPageService) OpenGuestPage(
 	ctx context.Context,
 	req *guestv1.OpenGuestPageRequest,
 ) (*guestv1.OpenGuestPageResponse, error) {
-	composition, err := s.useCases.OpenGuestPage(ctx, req.GetEventId(), req.GetQrLocationId())
+	composition, err := s.useCases.OpenGuestPage(ctx, req.GetEventId(), req.GetQrLocationId(), req.GetSessionId())
 	if err != nil {
 		return nil, connectError(ctx, err)
 	}

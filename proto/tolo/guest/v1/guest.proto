@@ -63,6 +63,7 @@ message OpenGuestPageRequest {
   string qr_location_id = 2;
   reserved 3;
   reserved "kind";
+  string session_id = 4;
 }
 
 message OpenGuestPageResponse {

@@ -82,7 +82,8 @@ Compose の `migrate` サービスは `Dockerfile` の `migrate` ターゲット
 
 ### QR 由来の人数計上
 
-`OpenGuestPage` は、設置箇所とテナントが分かるときに、ページを開いた記録を `guest_qr_accesses` に 1 行ずつ足す  
+`OpenGuestPage` は、設置箇所とテナントが分かり、`session_id` が空でないときに、ページを開いた記録を `guest_qr_accesses` に 1 行ずつ足す  
+同じイベント、設置箇所、`session_id` の組は、記録してから 30 分のあいだ足さない。この判定はプロセスのメモリで行うので、再起動すると忘れ、複数のインスタンスで動かすとそれぞれが 1 回ずつ数える  
 `QR_REPORT_INTERVAL` ごとに、まだ送っていない記録をイベント単位の `ReportMeasurements`（`source=QR`）1 回にまとめて送る。計上の単位は設置箇所と 1 分の窓の組で、`count_in` にその窓で開かれた回数を入れ、`count_out` は 0 にする  
 窓を 1 分にしたのは、Observation が直近 1 分（`OBSERVATION_WINDOW` の既定値）に終わった計上を合計して人/分に直すからである。送るのは終わった窓だけで、送れた記録は表から消す  
 送信が失敗した記録は残し、次の回で送り直す。Observation が `invalid_argument`、`permission_denied`、`failed_precondition` で拒んだ計上は、送り直しても通らないので、警告ログに残して捨てる。拒まれた要求に複数の計上が含まれていたら、計上を 1 つずつ送り直し、拒まれたものだけを捨てる

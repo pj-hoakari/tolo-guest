@@ -40,7 +40,7 @@ func newMemoryReadModel() *memoryReadModel {
 }
 
 func newGuestPageUseCases(readModel *memoryReadModel) *application.GuestReadModelService {
-	return application.NewGuestReadModelService(readModel, &memoryGuestSettings{byEvent: map[string]domain.GuestSettings{}}, nil, nil, nil, nil, readModel)
+	return application.NewGuestReadModelService(readModel, &memoryGuestSettings{byEvent: map[string]domain.GuestSettings{}}, nil, nil, nil, nil, readModel, application.NewQrOpenLimiter(time.Now))
 }
 
 func (m *memoryReadModel) RecordQrAccess(_ context.Context, access domain.QrAccess) error {
@@ -312,7 +312,7 @@ func TestOpenGuestPage(t *testing.T) {
 	routes, err := RoutesWithVerifier(
 		newTestVerifier(t, internaljwt.JWKS{}),
 		newGuestSettingsUseCases(),
-		application.NewGuestReadModelService(readModel, settings, nil, nil, nil, nil, readModel),
+		application.NewGuestReadModelService(readModel, settings, nil, nil, nil, nil, readModel, application.NewQrOpenLimiter(time.Now)),
 	)
 	if err != nil {
 		t.Fatalf("RoutesWithVerifier() error = %v", err)
@@ -323,10 +323,10 @@ func TestOpenGuestPage(t *testing.T) {
 
 	client := guestv1connect.NewGuestPageServiceClient(newClient(newTestServer(t, mux)))
 
-	open := func(t *testing.T, eventID, qrLocationID string) []guestv1.GuestComponent {
+	open := func(t *testing.T, eventID, qrLocationID, sessionID string) []guestv1.GuestComponent {
 		t.Helper()
 
-		got, err := client.OpenGuestPage(ctx, &guestv1.OpenGuestPageRequest{EventId: eventID, QrLocationId: qrLocationID})
+		got, err := client.OpenGuestPage(ctx, &guestv1.OpenGuestPageRequest{EventId: eventID, QrLocationId: qrLocationID, SessionId: sessionID})
 		if err != nil {
 			t.Fatalf("OpenGuestPage() error = %v", err)
 		}
@@ -340,12 +340,12 @@ func TestOpenGuestPage(t *testing.T) {
 		guestv1.GuestComponent_GUEST_COMPONENT_STAFF_MESSAGES,
 	}
 
-	t.Run("answers the composition of the location's kind without a token and counts the page open once", func(t *testing.T) {
-		got := open(t, testEventPublicID, "qr-east")
-
+	t.Run("answers the composition of the location's kind without a token and counts a session's repeat opens once", func(t *testing.T) {
 		want := []guestv1.GuestComponent{guestv1.GuestComponent_GUEST_COMPONENT_STAFF_MESSAGES, guestv1.GuestComponent_GUEST_COMPONENT_CROWD}
-		if !slices.Equal(got, want) {
-			t.Errorf("OpenGuestPage() components = %v, want %v", got, want)
+		for range 2 {
+			if got := open(t, testEventPublicID, "qr-east", "session-a"); !slices.Equal(got, want) {
+				t.Errorf("OpenGuestPage() components = %v, want %v", got, want)
+			}
 		}
 
 		_, _ = client.GetCrowd(ctx, &guestv1.GetCrowdRequest{EventId: testEventPublicID})
@@ -359,7 +359,7 @@ func TestOpenGuestPage(t *testing.T) {
 	})
 
 	t.Run("answers the default composition for a kind without a composition", func(t *testing.T) {
-		if got := open(t, testEventPublicID, "qr-hall"); !slices.Equal(got, defaults) {
+		if got := open(t, testEventPublicID, "qr-hall", "session-a"); !slices.Equal(got, defaults) {
 			t.Errorf("OpenGuestPage() components = %v, want %v", got, defaults)
 		}
 	})
@@ -367,11 +367,11 @@ func TestOpenGuestPage(t *testing.T) {
 	t.Run("answers the default composition without counting for an unknown location", func(t *testing.T) {
 		before := len(readModel.recordedQrAccesses())
 
-		if got := open(t, testEventPublicID, "qr-unknown"); !slices.Equal(got, defaults) {
+		if got := open(t, testEventPublicID, "qr-unknown", "session-a"); !slices.Equal(got, defaults) {
 			t.Errorf("OpenGuestPage() components = %v, want %v", got, defaults)
 		}
 
-		if got := open(t, otherEventPublicID, "qr-east"); !slices.Equal(got, defaults) {
+		if got := open(t, otherEventPublicID, "qr-east", "session-a"); !slices.Equal(got, defaults) {
 			t.Errorf("OpenGuestPage() components = %v, want %v", got, defaults)
 		}
 

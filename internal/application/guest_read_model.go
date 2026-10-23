@@ -44,6 +44,7 @@ type GuestReadModelService struct {
 	displayNames DisplayNameSource
 	qrLocations  QrLocationSource
 	qrAccesses   repository.QrAccessRepository
+	qrOpens      *QrOpenLimiter
 	unknownNames chan string
 }
 
@@ -55,6 +56,7 @@ func NewGuestReadModelService(
 	displayNames DisplayNameSource,
 	qrLocations QrLocationSource,
 	qrAccesses repository.QrAccessRepository,
+	qrOpens *QrOpenLimiter,
 ) *GuestReadModelService {
 	return &GuestReadModelService{
 		readModel:    readModel,
@@ -64,6 +66,7 @@ func NewGuestReadModelService(
 		displayNames: displayNames,
 		qrLocations:  qrLocations,
 		qrAccesses:   qrAccesses,
+		qrOpens:      qrOpens,
 		unknownNames: make(chan string, displayNameRequestBuffer),
 	}
 }

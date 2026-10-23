@@ -21,6 +21,7 @@ type readModelMocks struct {
 	names     *MockDisplayNameSource
 	qr        *MockQrLocationSource
 	accesses  *MockQrAccessRepository
+	now       *time.Time
 }
 
 func newGuestReadModelService(t *testing.T) (*application.GuestReadModelService, readModelMocks) {
@@ -35,10 +36,12 @@ func newGuestReadModelService(t *testing.T) (*application.GuestReadModelService,
 		names:     NewMockDisplayNameSource(ctrl),
 		qr:        NewMockQrLocationSource(ctrl),
 		accesses:  NewMockQrAccessRepository(ctrl),
+		now:       new(time.Date(2026, 10, 23, 9, 0, 0, 0, time.UTC)),
 	}
 
 	return application.NewGuestReadModelService(
 		mocks.readModel, mocks.settings, mocks.statuses, mocks.messages, mocks.names, mocks.qr, mocks.accesses,
+		application.NewQrOpenLimiter(func() time.Time { return *mocks.now }),
 	), mocks
 }
 

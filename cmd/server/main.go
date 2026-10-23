@@ -128,6 +128,7 @@ func run() error {
 		graphAuthoring,
 		graphAuthoring,
 		qrAccesses,
+		application.NewQrOpenLimiter(time.Now),
 	)
 	qrCounts := application.NewQrCountReporter(qrAccesses, observation)
 
