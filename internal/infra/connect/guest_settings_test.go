@@ -121,7 +121,6 @@ func TestGuestSettings(t *testing.T) {
 		{Kind: "entrance", Components: []guestv1.GuestComponent{
 			guestv1.GuestComponent_GUEST_COMPONENT_QUEUES,
 		}},
-		{Kind: "blank", Components: nil},
 	}
 
 	assertCompositions := func(t *testing.T, label string, got *guestv1.GuestSettings, eventID string, want []*guestv1.PageComposition) {

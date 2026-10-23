@@ -26,7 +26,6 @@ func TestGuestSettingsRepository(t *testing.T) {
 		PageCompositions: []domain.PageComposition{
 			{Kind: "exit", Components: []domain.Component{domain.ComponentStaffMessages, domain.ComponentCrowd}},
 			{Kind: "entrance", Components: []domain.Component{domain.ComponentQueues, domain.ComponentStaffMessages, domain.ComponentCrowd}},
-			{Kind: "blank", Components: []domain.Component{}},
 		},
 	}
 

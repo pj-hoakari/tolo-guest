@@ -22,6 +22,7 @@ var clientErrors = []struct {
 	{domain.ErrKindRequired, connectrpc.CodeInvalidArgument, "page composition kind is required"},
 	{domain.ErrDuplicateKind, connectrpc.CodeInvalidArgument, "page composition kind is duplicated"},
 	{domain.ErrComponentUnspecified, connectrpc.CodeInvalidArgument, "page composition component is unspecified"},
+	{domain.ErrComponentsRequired, connectrpc.CodeInvalidArgument, "page composition components are required"},
 	{domain.ErrDuplicateComponent, connectrpc.CodeInvalidArgument, "page composition component is duplicated"},
 	{tenantctx.ErrMissing, connectrpc.CodePermissionDenied, "tenant ID is missing from the token"},
 	{tenantctx.ErrMismatch, connectrpc.CodePermissionDenied, "tenant ID does not match the token"},

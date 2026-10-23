@@ -8,6 +8,7 @@ import (
 
 var (
 	ErrKindRequired         = errors.New("page composition kind is required")
+	ErrComponentsRequired   = errors.New("page composition components are required")
 	ErrDuplicateKind        = errors.New("page composition kind is duplicated")
 	ErrComponentUnspecified = errors.New("page composition component is unspecified")
 	ErrDuplicateComponent   = errors.New("page composition component is duplicated")
@@ -59,6 +60,10 @@ func NewGuestSettings(eventID, tenantPublicID string, compositions []PageComposi
 		}
 
 		kinds[composition.Kind] = struct{}{}
+
+		if len(composition.Components) == 0 {
+			return GuestSettings{}, ErrComponentsRequired
+		}
 
 		for i, component := range composition.Components {
 			if component < ComponentCrowd || component > ComponentStaffMessages {

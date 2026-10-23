@@ -23,12 +23,12 @@ func TestNewGuestSettings(t *testing.T) {
 			{Kind: "exit", Components: []domain.Component{domain.ComponentStaffMessages, crowd}},
 			{Kind: "entrance", Components: []domain.Component{domain.ComponentQueues}},
 		}, nil},
-		{"a kind without components", []domain.PageComposition{{Kind: "blank", Components: nil}}, nil},
+		{"a kind without components", []domain.PageComposition{{Kind: "blank", Components: nil}}, domain.ErrComponentsRequired},
 		{"empty kind", []domain.PageComposition{{Kind: "", Components: []domain.Component{crowd}}}, domain.ErrKindRequired},
 		{"blank kind", []domain.PageComposition{{Kind: " ", Components: []domain.Component{crowd}}}, domain.ErrKindRequired},
 		{"duplicate kind", []domain.PageComposition{
 			{Kind: "exit", Components: []domain.Component{crowd}},
-			{Kind: "exit", Components: nil},
+			{Kind: "exit", Components: []domain.Component{crowd}},
 		}, domain.ErrDuplicateKind},
 		{"unspecified component", []domain.PageComposition{
 			{Kind: "exit", Components: []domain.Component{domain.ComponentUnspecified}},
@@ -60,7 +60,6 @@ func TestGuestSettingsComponents(t *testing.T) {
 
 	configured, err := domain.NewGuestSettings("event", "tenant", []domain.PageComposition{
 		{Kind: "exit", Components: []domain.Component{domain.ComponentStaffMessages}},
-		{Kind: "blank", Components: nil},
 	})
 	if err != nil {
 		t.Fatalf("NewGuestSettings() error = %v", err)
@@ -73,7 +72,6 @@ func TestGuestSettingsComponents(t *testing.T) {
 		want     []domain.Component
 	}{
 		{"configured kind", configured, "exit", []domain.Component{domain.ComponentStaffMessages}},
-		{"configured kind without components", configured, "blank", nil},
 		{"kind missing from the settings", configured, "entrance", everything},
 		{"event without settings", domain.DefaultGuestSettings("event"), "exit", everything},
 	}
