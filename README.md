@@ -64,6 +64,20 @@ Compose の `migrate` サービスは `Dockerfile` の `migrate` ターゲット
 ヘッダ・TLS・タイムアウトなどその他の `OTEL_EXPORTER_OTLP_*` は exporter がそのまま解釈する  
 ログは標準出力へ 1 行 1 件の JSON で書き出す
 
+### 情報更新 push の受け口
+
+上流が publish した情報更新は、Connect のサービスと同じサーバーの次のパスで受ける（Compose では JetStream からの中継が、Cloud Run では Pub/Sub の push subscription が POST する）
+
+| パス | 本文 |
+| --- | --- |
+| `POST /push/guest-status` | `tolo.observation.v1.GuestStatus` の proto のバイト列 |
+| `POST /push/guest-messages` | `tolo.operation.v1.GuestMessagesUpdate` の proto のバイト列 |
+
+受け口は Service Gateway を経由せず、内部 JWT も要求しない。アプリは認証しないので、到達できる呼び出し元の制限はプラットフォームに任せる（Compose では中継と同じネットワークにだけ接続し、ホストへ公開しない。Cloud Run では push 用 SA にだけ Invoker を付与する）  
+`x-goog-pubsub-message-id`、`x-goog-pubsub-ordering-key`、`x-goog-pubsub-publish-time` はログに出すだけで、新旧と重複は本文の `sequence` と `message_id` で判定する  
+読み取りモデルに反映できたら 204 を返す。データベースの停止などで反映できなければ 503 を返し、再送させる  
+復号できない本文、`event_id` が空の本文、10 MiB を超える本文は再送しても直らないので、エラーログに残して 204 を返す。捨てた分は復旧 pull で回復する
+
 ### マイグレーション
 
 ローカルでマイグレーションを実行する場合は、Compose で PostgreSQL を起動してから次を実行する（接続先は `DATABASE_URL` で上書きできる）  

@@ -131,6 +131,7 @@ func run() error {
 
 	handler := httpapi.NewHandler(
 		httpapi.HealthRoutes(httpapi.ReadinessCheck{Name: "database", Check: db.PingContext}),
+		httpapi.PushRoutes(readModel),
 		serviceRoutes,
 	)
 
