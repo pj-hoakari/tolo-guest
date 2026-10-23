@@ -329,7 +329,7 @@ func TestPublicProceduresIgnoreTheAuthorizationHeader(t *testing.T) {
 
 	calls := map[string]func(context.Context) error{
 		"OpenGuestPage": func(ctx context.Context) error {
-			_, err := client.OpenGuestPage(ctx, &guestv1.OpenGuestPageRequest{EventId: testEventPublicID})
+			_, err := client.OpenGuestPage(ctx, &guestv1.OpenGuestPageRequest{EventId: testEventPublicID, QrLocationId: "qr-east"})
 
 			return err
 		},
@@ -352,17 +352,7 @@ func TestPublicProceduresIgnoreTheAuthorizationHeader(t *testing.T) {
 
 	for name, call := range calls {
 		for _, authorization := range []string{"", "Bearer not-a-token"} {
-			err := call(authorized(authorization))
-
-			if name == "OpenGuestPage" {
-				if got, want := connectrpc.CodeOf(err), connectrpc.CodeUnimplemented; got != want {
-					t.Errorf("%s with Authorization %q error code = %v, want %v", name, authorization, got, want)
-				}
-
-				continue
-			}
-
-			if err != nil {
+			if err := call(authorized(authorization)); err != nil {
 				t.Errorf("%s with Authorization %q error = %v, want none", name, authorization, err)
 			}
 		}

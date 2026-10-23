@@ -53,10 +53,11 @@ Compose の `migrate` サービスは `Dockerfile` の `migrate` ターゲット
 | `INTERNAL_JWKS_URL` | `http://gateway:8080/.well-known/jwks.json` | 内部 JWT の検証に使う JWKS の取得先 |
 | `INTERNAL_JWT_ISSUER` | `service-gateway` | 内部 JWT に期待する `iss` |
 | `INTERNAL_JWT_AUDIENCE` | `tolo-guest` | 内部 JWT に期待する `aud` |
-| `OBSERVATION_URL` | なし（必須） | 復旧 pull で `GetGuestSnapshot` を呼ぶ先。Service Gateway の内部用 listener を指す |
+| `OBSERVATION_URL` | なし（必須） | 復旧 pull で `GetGuestSnapshot` を、QR 由来の人数計上の送信で `ReportMeasurements` を呼ぶ先。Service Gateway の内部用 listener を指す |
 | `OPERATION_URL` | なし（必須） | 復旧 pull で `ListStaffMessages` を呼ぶ先。Service Gateway の内部用 listener を指す |
 | `GRAPH_AUTHORING_URL` | なし（必須） | 表示名の pull で `GetDisplayNames` を呼ぶ先。Service Gateway の内部用 listener を指す |
 | `RECONCILE_INTERVAL` | `10m` | 起動後に繰り返す復旧 pull の間隔。Go の `time.ParseDuration` の形式で、正の値をとる |
+| `QR_REPORT_INTERVAL` | `30s` | QR 由来の人数計上を Observation へ送る間隔。形式は `RECONCILE_INTERVAL` と同じ |
 | `LOG_LEVEL` | `info` | ログに出力する最小レベル。`debug`／`info`／`warn`（`warning` も同義）／`error`／`critical` を取り、未知の値ならサーバーは起動しない |
 | `GOOGLE_CLOUD_PROJECT` | なし | 設定するとログの `logging.googleapis.com/trace` を `projects/<project>/traces/<trace_id>` 形式にし、Cloud Logging でトレースと相関させる。未設定なら素のトレース ID を出力する |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` / `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` | なし | どちらかを設定したときだけ OTLP/HTTP で span を export する。未設定ならトレーシングは無効 |
@@ -78,6 +79,14 @@ Compose の `migrate` サービスは `Dockerfile` の `migrate` ターゲット
 `x-goog-pubsub-message-id`、`x-goog-pubsub-ordering-key`、`x-goog-pubsub-publish-time` はログに出すだけで、新旧と重複は本文の `sequence` と `message_id` で判定する  
 読み取りモデルに反映できたら 204 を返す。データベースの停止などで反映できなければ 503 を返し、再送させる  
 復号できない本文、`event_id` が空の本文、10 MiB を超える本文は再送しても直らないので、エラーログに残して 204 を返す。捨てた分は復旧 pull で回復する
+
+### QR 由来の人数計上
+
+`OpenGuestPage` は、設置箇所とテナントが分かり、`session_id` が空でないときに、ページを開いた記録を `guest_qr_accesses` に 1 行ずつ足す  
+同じイベント、設置箇所、`session_id` の組は、記録してから 30 分のあいだ足さない。この判定はプロセスのメモリで行うので、再起動すると忘れ、複数のインスタンスで動かすとそれぞれが 1 回ずつ数える  
+`QR_REPORT_INTERVAL` ごとに、まだ送っていない記録をイベント単位の `ReportMeasurements`（`source=QR`）1 回にまとめて送る。計上の単位は設置箇所と 1 分の窓の組で、`count_in` にその窓で開かれた回数を入れ、`count_out` は 0 にする  
+窓を 1 分にしたのは、Observation が直近 1 分（`OBSERVATION_WINDOW` の既定値）に終わった計上を合計して人/分に直すからである。送るのは終わった窓だけで、送れた記録は表から消す  
+送信が失敗した記録は残し、次の回で送り直す。Observation が `invalid_argument`、`permission_denied`、`failed_precondition` で拒んだ計上は、送り直しても通らないので、警告ログに残して捨てる。拒まれた要求に複数の計上が含まれていたら、計上を 1 つずつ送り直し、拒まれたものだけを捨てる
 
 ### マイグレーション
 

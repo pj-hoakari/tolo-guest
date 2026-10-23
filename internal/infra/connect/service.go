@@ -38,6 +38,23 @@ func NewGuestPageService(useCases application.GuestPageUseCases) *GuestPageServi
 	}
 }
 
+func (s *GuestPageService) OpenGuestPage(
+	ctx context.Context,
+	req *guestv1.OpenGuestPageRequest,
+) (*guestv1.OpenGuestPageResponse, error) {
+	composition, err := s.useCases.OpenGuestPage(ctx, req.GetEventId(), req.GetQrLocationId(), req.GetSessionId())
+	if err != nil {
+		return nil, connectError(ctx, err)
+	}
+
+	components := make([]guestv1.GuestComponent, 0, len(composition))
+	for _, component := range composition {
+		components = append(components, protoComponents[component])
+	}
+
+	return &guestv1.OpenGuestPageResponse{Components: components}, nil
+}
+
 func (s *GuestPageService) GetCrowd(ctx context.Context, req *guestv1.GetCrowdRequest) (*guestv1.GetCrowdResponse, error) {
 	view, err := s.useCases.GetCrowd(ctx, req.GetEventId(), req.GetLanguage())
 	if err != nil {

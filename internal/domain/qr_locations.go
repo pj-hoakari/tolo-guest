@@ -1,6 +1,11 @@
 package domain
 
-import "net/url"
+import (
+	"errors"
+	"net/url"
+)
+
+var ErrQrLocationIDRequired = errors.New("QR location ID is required")
 
 type QrLocation struct {
 	QrLocationID string
@@ -12,6 +17,12 @@ type QrLocations struct {
 	EventID    string
 	RevisionID string
 	Locations  []QrLocation
+}
+
+type QrAccess struct {
+	EventID        string
+	QrLocationID   string
+	TenantPublicID string
 }
 
 type IssuedURL struct {
@@ -33,4 +44,16 @@ func (l QrLocations) IssuedURLs() []IssuedURL {
 	}
 
 	return issued
+}
+
+func (l QrLocations) Find(qrLocationID string) (QrLocation, bool) {
+	for _, location := range l.Locations {
+		if location.QrLocationID == qrLocationID {
+			return location, true
+		}
+	}
+
+	var none QrLocation
+
+	return none, false
 }

@@ -131,6 +131,7 @@ type OpenGuestPageRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
 	QrLocationId  string                 `protobuf:"bytes,2,opt,name=qr_location_id,json=qrLocationId,proto3" json:"qr_location_id,omitempty"`
+	SessionId     string                 `protobuf:"bytes,4,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -175,6 +176,13 @@ func (x *OpenGuestPageRequest) GetEventId() string {
 func (x *OpenGuestPageRequest) GetQrLocationId() string {
 	if x != nil {
 		return x.QrLocationId
+	}
+	return ""
+}
+
+func (x *OpenGuestPageRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
 	}
 	return ""
 }
@@ -1181,10 +1189,12 @@ var File_tolo_guest_v1_guest_proto protoreflect.FileDescriptor
 
 const file_tolo_guest_v1_guest_proto_rawDesc = "" +
 	"\n" +
-	"\x19tolo/guest/v1/guest.proto\x12\rtolo.guest.v1\x1a\x16authz/v1/options.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"c\n" +
+	"\x19tolo/guest/v1/guest.proto\x12\rtolo.guest.v1\x1a\x16authz/v1/options.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x82\x01\n" +
 	"\x14OpenGuestPageRequest\x12\x19\n" +
 	"\bevent_id\x18\x01 \x01(\tR\aeventId\x12$\n" +
-	"\x0eqr_location_id\x18\x02 \x01(\tR\fqrLocationIdJ\x04\b\x03\x10\x04R\x04kind\"V\n" +
+	"\x0eqr_location_id\x18\x02 \x01(\tR\fqrLocationId\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x04 \x01(\tR\tsessionIdJ\x04\b\x03\x10\x04R\x04kind\"V\n" +
 	"\x15OpenGuestPageResponse\x12=\n" +
 	"\n" +
 	"components\x18\x01 \x03(\x0e2\x1d.tolo.guest.v1.GuestComponentR\n" +
