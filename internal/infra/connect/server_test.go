@@ -67,7 +67,7 @@ func newTestVerifier(t *testing.T, keys internaljwt.JWKS) *verifier.Verifier {
 func newTestHandler(t *testing.T, keys internaljwt.JWKS) http.Handler {
 	t.Helper()
 
-	routes, err := RoutesWithVerifier(newTestVerifier(t, keys), newGuestSettingsUseCases())
+	routes, err := RoutesWithVerifier(newTestVerifier(t, keys), newGuestSettingsUseCases(), newGuestPageUseCases(newMemoryReadModel()))
 	if err != nil {
 		t.Fatalf("RoutesWithVerifier() error = %v", err)
 	}
@@ -96,7 +96,7 @@ func newTestHandlerForJWKSURL(t *testing.T, jwksURL string) http.Handler {
 		t.Fatalf("create internal JWT verifier: %v", err)
 	}
 
-	routes, err := RoutesWithVerifier(tokenVerifier, newGuestSettingsUseCases())
+	routes, err := RoutesWithVerifier(tokenVerifier, newGuestSettingsUseCases(), newGuestPageUseCases(newMemoryReadModel()))
 	if err != nil {
 		t.Fatalf("RoutesWithVerifier() error = %v", err)
 	}
@@ -189,7 +189,7 @@ func TestRoutesWithJWTSettings(t *testing.T) {
 		settings := DefaultJWTSettings()
 		settings.JWKSURL = newTestJWKSURL(t, keys)
 
-		routes, err := RoutesWithJWTSettings(settings, newGuestSettingsUseCases())
+		routes, err := RoutesWithJWTSettings(settings, newGuestSettingsUseCases(), newGuestPageUseCases(newMemoryReadModel()))
 		if err != nil {
 			t.Fatalf("RoutesWithJWTSettings() error = %v", err)
 		}
@@ -208,7 +208,7 @@ func TestRoutesWithJWTSettings(t *testing.T) {
 		settings := DefaultJWTSettings()
 		settings.JWKSURL = ""
 
-		_, err := RoutesWithJWTSettings(settings, newGuestSettingsUseCases())
+		_, err := RoutesWithJWTSettings(settings, newGuestSettingsUseCases(), newGuestPageUseCases(newMemoryReadModel()))
 		if !errors.Is(err, jwks.ErrMissingURL) {
 			t.Fatalf("RoutesWithJWTSettings() error = %v, want %v", err, jwks.ErrMissingURL)
 		}
@@ -352,8 +352,18 @@ func TestPublicProceduresIgnoreTheAuthorizationHeader(t *testing.T) {
 
 	for name, call := range calls {
 		for _, authorization := range []string{"", "Bearer not-a-token"} {
-			if got, want := connectrpc.CodeOf(call(authorized(authorization))), connectrpc.CodeUnimplemented; got != want {
-				t.Errorf("%s with Authorization %q error code = %v, want %v", name, authorization, got, want)
+			err := call(authorized(authorization))
+
+			if name == "OpenGuestPage" {
+				if got, want := connectrpc.CodeOf(err), connectrpc.CodeUnimplemented; got != want {
+					t.Errorf("%s with Authorization %q error code = %v, want %v", name, authorization, got, want)
+				}
+
+				continue
+			}
+
+			if err != nil {
+				t.Errorf("%s with Authorization %q error = %v, want none", name, authorization, err)
 			}
 		}
 	}

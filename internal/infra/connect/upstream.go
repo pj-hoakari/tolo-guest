@@ -7,6 +7,8 @@ import (
 	connectrpc "connectrpc.com/connect/v2"
 	"connectrpc.com/connect/v2/connecthttp"
 
+	graphv1 "github.com/pj-hoakari/tolo-graph-authoring/gen/tolo/graph/v1"
+	"github.com/pj-hoakari/tolo-graph-authoring/gen/tolo/graph/v1/graphv1connect"
 	observationv1 "github.com/pj-hoakari/tolo-observation/gen/tolo/observation/v1"
 	"github.com/pj-hoakari/tolo-observation/gen/tolo/observation/v1/observationv1connect"
 	operationv1 "github.com/pj-hoakari/tolo-operation/gen/tolo/operation/v1"
@@ -147,4 +149,43 @@ func (c *OperationClient) ListGuestMessages(ctx context.Context, tenantPublicID,
 	}
 
 	return messages, nil
+}
+
+type GraphAuthoringClient struct {
+	client graphv1connect.GraphSupplyServiceClient
+}
+
+func NewGraphAuthoringClient(httpClient connecthttp.HTTPClient, gatewayURL string) *GraphAuthoringClient {
+	return &GraphAuthoringClient{client: graphv1connect.NewGraphSupplyServiceClient(newGatewayClient(httpClient, gatewayURL))}
+}
+
+func (c *GraphAuthoringClient) GetDisplayNames(ctx context.Context, eventID string) (domain.DisplayNames, bool, error) {
+	res, err := c.client.GetDisplayNames(ctx, &graphv1.GetDisplayNamesRequest{EventId: eventID})
+	if connectrpc.CodeOf(err) == connectrpc.CodeNotFound {
+		var none domain.DisplayNames
+
+		return none, false, nil
+	}
+
+	if err != nil {
+		return domain.DisplayNames{}, false, fmt.Errorf("call GetDisplayNames: %w", err)
+	}
+
+	points := make(map[string]domain.LocalizedText, len(res.GetDisplayNames()))
+	for pointID, text := range res.GetDisplayNames() {
+		points[pointID] = text.GetTexts()
+	}
+
+	endpoints := make(map[string]domain.RouteEndpoints, len(res.GetRouteEndpoints()))
+	for routeID, e := range res.GetRouteEndpoints() {
+		endpoints[routeID] = domain.RouteEndpoints{FromPointID: e.GetFromPointId(), ToPointID: e.GetToPointId()}
+	}
+
+	return domain.DisplayNames{
+		EventID:        eventID,
+		RevisionID:     res.GetRevisionId(),
+		Points:         points,
+		Routes:         res.GetRouteDisplayNames(),
+		RouteEndpoints: endpoints,
+	}, true, nil
 }

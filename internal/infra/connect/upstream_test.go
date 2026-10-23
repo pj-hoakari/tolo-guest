@@ -11,6 +11,8 @@ import (
 	"connectrpc.com/connect/v2/connecthttp"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	graphv1 "github.com/pj-hoakari/tolo-graph-authoring/gen/tolo/graph/v1"
+	"github.com/pj-hoakari/tolo-graph-authoring/gen/tolo/graph/v1/graphv1connect"
 	observationv1 "github.com/pj-hoakari/tolo-observation/gen/tolo/observation/v1"
 	"github.com/pj-hoakari/tolo-observation/gen/tolo/observation/v1/observationv1connect"
 	operationv1 "github.com/pj-hoakari/tolo-operation/gen/tolo/operation/v1"
@@ -70,6 +72,26 @@ func (f *fakeStaffCommunication) ListStaffMessages(
 	f.requests <- req
 
 	return &operationv1.ListStaffMessagesResponse{Messages: f.messages}, nil
+}
+
+type fakeGraphSupply struct {
+	graphv1connect.UnimplementedGraphSupplyServiceHandler
+
+	calls chan upstreamCall
+	names *graphv1.GetDisplayNamesResponse
+}
+
+func (f *fakeGraphSupply) GetDisplayNames(
+	ctx context.Context,
+	req *graphv1.GetDisplayNamesRequest,
+) (*graphv1.GetDisplayNamesResponse, error) {
+	f.calls <- recordCall(ctx)
+
+	if req.GetEventId() != testEventPublicID {
+		return nil, connectrpc.NewError(connectrpc.CodeNotFound, "revision not found")
+	}
+
+	return f.names, nil
 }
 
 func newGatewayServer(t *testing.T, register func(*connectrpc.Server)) string {
@@ -194,4 +216,58 @@ func TestOperationClient(t *testing.T) {
 		req.GetAudience() != operationv1.Audience_AUDIENCE_GUEST {
 		t.Errorf("ListStaffMessages request = %v, want the guest audience of the event and its tenant", req)
 	}
+}
+
+func TestGraphAuthoringClient(t *testing.T) {
+	t.Parallel()
+
+	fake := &fakeGraphSupply{
+		calls: make(chan upstreamCall, 2),
+		names: &graphv1.GetDisplayNamesResponse{
+			RevisionId: "rev-1",
+			DisplayNames: map[string]*graphv1.LocalizedText{
+				"p1": {Texts: map[string]string{"ja": "東門", "en": "East Gate"}},
+				"p2": {Texts: map[string]string{"ja": "西門"}},
+			},
+			RouteDisplayNames: map[string]string{"r1": "メイン通り"},
+			RouteEndpoints: map[string]*graphv1.RouteEndpoints{
+				"r1": {FromPointId: "p1", ToPointId: "p2"},
+				"r2": {FromPointId: "p2", ToPointId: "p1"},
+			},
+		},
+	}
+	url := newGatewayServer(t, func(server *connectrpc.Server) {
+		graphv1connect.RegisterGraphSupplyServiceHandler(server, fake)
+	})
+	client := NewGraphAuthoringClient(http.DefaultClient, url)
+
+	got, found, err := client.GetDisplayNames(authorized("Bearer leaked"), testEventPublicID)
+	if err != nil || !found {
+		t.Fatalf("GetDisplayNames() = _, %v, %v, want found", found, err)
+	}
+
+	want := domain.DisplayNames{
+		EventID:    testEventPublicID,
+		RevisionID: "rev-1",
+		Points: map[string]domain.LocalizedText{
+			"p1": {"ja": "東門", "en": "East Gate"},
+			"p2": {"ja": "西門"},
+		},
+		Routes: map[string]string{"r1": "メイン通り"},
+		RouteEndpoints: map[string]domain.RouteEndpoints{
+			"r1": {FromPointID: "p1", ToPointID: "p2"},
+			"r2": {FromPointID: "p2", ToPointID: "p1"},
+		},
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("GetDisplayNames() = %+v, want %+v", got, want)
+	}
+
+	assertNewMachineCaller(t, <-fake.calls)
+
+	if _, found, err := client.GetDisplayNames(context.Background(), otherEventPublicID); err != nil || found {
+		t.Errorf("GetDisplayNames() for an event without a published revision = _, %v, %v, want not found without error", found, err)
+	}
+
+	assertNewMachineCaller(t, <-fake.calls)
 }

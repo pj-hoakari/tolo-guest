@@ -55,6 +55,7 @@ Compose の `migrate` サービスは `Dockerfile` の `migrate` ターゲット
 | `INTERNAL_JWT_AUDIENCE` | `tolo-guest` | 内部 JWT に期待する `aud` |
 | `OBSERVATION_URL` | なし（必須） | 復旧 pull で `GetGuestSnapshot` を呼ぶ先。Service Gateway の内部用 listener を指す |
 | `OPERATION_URL` | なし（必須） | 復旧 pull で `ListStaffMessages` を呼ぶ先。Service Gateway の内部用 listener を指す |
+| `GRAPH_AUTHORING_URL` | なし（必須） | 表示名の pull で `GetDisplayNames` を呼ぶ先。Service Gateway の内部用 listener を指す |
 | `RECONCILE_INTERVAL` | `10m` | 起動後に繰り返す復旧 pull の間隔。Go の `time.ParseDuration` の形式で、正の値をとる |
 | `LOG_LEVEL` | `info` | ログに出力する最小レベル。`debug`／`info`／`warn`（`warning` も同義）／`error`／`critical` を取り、未知の値ならサーバーは起動しない |
 | `GOOGLE_CLOUD_PROJECT` | なし | 設定するとログの `logging.googleapis.com/trace` を `projects/<project>/traces/<trace_id>` 形式にし、Cloud Logging でトレースと相関させる。未設定なら素のトレース ID を出力する |
