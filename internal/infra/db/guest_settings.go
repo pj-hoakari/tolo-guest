@@ -144,11 +144,10 @@ func (r *PostgresGuestSettingsRepository) ListEventTenants(ctx context.Context) 
 }
 
 func storedComponent(value string) (domain.Component, error) {
-	for component, stored := range componentValues {
-		if stored == value {
-			return component, nil
-		}
+	component, ok := storedValue(componentValues, value)
+	if !ok {
+		return domain.ComponentUnspecified, fmt.Errorf("unknown stored component %q", value)
 	}
 
-	return domain.ComponentUnspecified, fmt.Errorf("unknown stored component %q", value)
+	return component, nil
 }
