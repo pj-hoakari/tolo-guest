@@ -25,14 +25,13 @@ func TestRecordQrAccess(t *testing.T) {
 		EventID        string `db:"event_id"`
 		QrLocationID   string `db:"qr_location_id"`
 		TenantPublicID string `db:"tenant_public_id"`
-		Unreported     bool   `db:"unreported"`
 		HasOpenedAt    bool   `db:"has_opened_at"`
 	}
 
 	var rows []row
 	if err := testDB.SelectContext(ctx, &rows, `
 		SELECT id, event_id, qr_location_id, tenant_public_id,
-			reported_at IS NULL AS unreported, opened_at IS NOT NULL AS has_opened_at
+			opened_at IS NOT NULL AS has_opened_at
 		FROM guest_qr_accesses
 		WHERE event_id = $1
 		ORDER BY id`, access.EventID); err != nil {
@@ -44,7 +43,7 @@ func TestRecordQrAccess(t *testing.T) {
 	}
 
 	for _, got := range rows {
-		want := row{ID: got.ID, EventID: access.EventID, QrLocationID: access.QrLocationID, TenantPublicID: access.TenantPublicID, Unreported: true, HasOpenedAt: true}
+		want := row{ID: got.ID, EventID: access.EventID, QrLocationID: access.QrLocationID, TenantPublicID: access.TenantPublicID, HasOpenedAt: true}
 		if got != want {
 			t.Errorf("QR access = %+v, want %+v", got, want)
 		}

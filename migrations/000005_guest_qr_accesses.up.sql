@@ -3,6 +3,5 @@ CREATE TABLE guest_qr_accesses (
     event_id TEXT NOT NULL,
     qr_location_id TEXT NOT NULL,
     tenant_public_id TEXT NOT NULL,
-    opened_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    reported_at TIMESTAMPTZ
+    opened_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
