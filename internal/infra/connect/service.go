@@ -1,35 +1,25 @@
 package connect
 
 import (
-	"context"
-
-	greetv1 "github.com/pj-hoakari/tolo-guest/gen/greet/v1"
-	"github.com/pj-hoakari/tolo-guest/gen/greet/v1/greetv1connect"
-	"github.com/pj-hoakari/tolo-guest/internal/application"
+	"github.com/pj-hoakari/tolo-guest/gen/tolo/guest/v1/guestv1connect"
 )
 
-// Service is the Connect transport implementation of GreetService.
-type Service struct {
-	greetv1connect.UnimplementedGreetServiceHandler
-	greetService application.GreetUseCases
+type GuestPageService struct {
+	guestv1connect.UnimplementedGuestPageServiceHandler
 }
 
-func NewService(greetService application.GreetUseCases) *Service {
-	return &Service{
-		UnimplementedGreetServiceHandler: greetv1connect.UnimplementedGreetServiceHandler{},
-		greetService:                     greetService,
+func NewGuestPageService() *GuestPageService {
+	return &GuestPageService{
+		UnimplementedGuestPageServiceHandler: guestv1connect.UnimplementedGuestPageServiceHandler{},
 	}
 }
 
-func (s *Service) Greet(ctx context.Context, req *greetv1.GreetRequest) (*greetv1.GreetResponse, error) {
-	greeting, err := s.greetService.Greet(ctx, application.GreetInput{
-		Name: req.GetName(),
-	})
-	if err != nil {
-		return nil, connectError(ctx, err)
-	}
+type GuestSettingsService struct {
+	guestv1connect.UnimplementedGuestSettingsServiceHandler
+}
 
-	return &greetv1.GreetResponse{
-		Greeting: greeting.Message(),
-	}, nil
+func NewGuestSettingsService() *GuestSettingsService {
+	return &GuestSettingsService{
+		UnimplementedGuestSettingsServiceHandler: guestv1connect.UnimplementedGuestSettingsServiceHandler{},
+	}
 }

@@ -1,0 +1,139 @@
+syntax = "proto3";
+
+package tolo.guest.v1;
+
+import "authz/v1/options.proto";
+import "google/protobuf/timestamp.proto";
+
+service GuestPageService {
+  rpc OpenGuestPage(OpenGuestPageRequest) returns (OpenGuestPageResponse) {
+    option (authz.v1.auth_policy) = {level: AUTH_LEVEL_PUBLIC};
+  }
+  rpc GetCrowd(GetCrowdRequest) returns (GetCrowdResponse) {
+    option (authz.v1.auth_policy) = {level: AUTH_LEVEL_PUBLIC};
+  }
+  rpc GetQueues(GetQueuesRequest) returns (GetQueuesResponse) {
+    option (authz.v1.auth_policy) = {level: AUTH_LEVEL_PUBLIC};
+  }
+  rpc ListGuestMessages(ListGuestMessagesRequest) returns (ListGuestMessagesResponse) {
+    option (authz.v1.auth_policy) = {level: AUTH_LEVEL_PUBLIC};
+  }
+}
+
+service GuestSettingsService {
+  rpc GetGuestSettings(GetGuestSettingsRequest) returns (GuestSettings) {
+    option (authz.v1.auth_policy) = {
+      level: AUTH_LEVEL_AUTHENTICATED
+      required_scopes: "events.read"
+      token_uses: "event_access"
+    };
+  }
+  rpc UpdateGuestSettings(UpdateGuestSettingsRequest) returns (GuestSettings) {
+    option (authz.v1.auth_policy) = {
+      level: AUTH_LEVEL_AUTHENTICATED
+      required_scopes: "events.manage"
+      token_uses: "event_access"
+    };
+  }
+}
+
+enum GuestComponent {
+  GUEST_COMPONENT_UNSPECIFIED = 0;
+  GUEST_COMPONENT_CROWD = 1;
+  GUEST_COMPONENT_QUEUES = 2;
+  GUEST_COMPONENT_STAFF_MESSAGES = 3;
+}
+
+enum CrowdLevel {
+  CROWD_LEVEL_UNSPECIFIED = 0;
+  CROWD_LEVEL_LOW = 1;
+  CROWD_LEVEL_MID = 2;
+  CROWD_LEVEL_HIGH = 3;
+}
+
+message OpenGuestPageRequest {
+  string event_id = 1;
+  string qr_location_id = 2;
+  string kind = 3;
+}
+
+message OpenGuestPageResponse {
+  repeated GuestComponent components = 1;
+}
+
+message GetCrowdRequest {
+  string event_id = 1;
+  string language = 2;
+}
+
+message GetCrowdResponse {
+  google.protobuf.Timestamp taken_at = 1;
+  repeated Crowd crowd = 2;
+}
+
+message Crowd {
+  oneof target {
+    string point_id = 1;
+    string route_id = 2;
+  }
+  string display_name = 3;
+  CrowdLevel level = 4;
+  bool danger = 5;
+}
+
+message GetQueuesRequest {
+  string event_id = 1;
+  string language = 2;
+}
+
+message GetQueuesResponse {
+  google.protobuf.Timestamp taken_at = 1;
+  repeated Queue queues = 2;
+}
+
+message Queue {
+  string queue_id = 1;
+  string display_name = 2;
+  double wait_time_minutes = 3;
+  int32 turnaround_count = 4;
+  repeated QueueGate gates = 5;
+}
+
+message QueueGate {
+  string point_id = 1;
+  string display_name = 2;
+  bool recommended = 3;
+}
+
+message ListGuestMessagesRequest {
+  string event_id = 1;
+}
+
+message ListGuestMessagesResponse {
+  repeated GuestMessage messages = 1;
+}
+
+message GuestMessage {
+  string message_id = 1;
+  string body = 2;
+  google.protobuf.Timestamp sent_at = 3;
+}
+
+message GetGuestSettingsRequest {
+  string event_id = 1;
+}
+
+message UpdateGuestSettingsRequest {
+  string event_id = 1;
+  repeated PageComposition page_compositions = 2;
+}
+
+message GuestSettings {
+  string event_id = 1;
+  repeated PageComposition page_compositions = 2;
+}
+
+message PageComposition {
+  string kind = 1;
+  repeated GuestComponent components = 2;
+}

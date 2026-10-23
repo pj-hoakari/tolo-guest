@@ -13,76 +13,23 @@ import (
 	connectrpc "connectrpc.com/connect/v2"
 	"go.opentelemetry.io/otel/trace"
 
-	greetv1 "github.com/pj-hoakari/tolo-guest/gen/greet/v1"
-	"github.com/pj-hoakari/tolo-guest/internal/application"
-	"github.com/pj-hoakari/tolo-guest/internal/domain"
 	"github.com/pj-hoakari/tolo-guest/internal/logging"
 )
-
-func TestServiceGreet(t *testing.T) {
-	t.Parallel()
-
-	service := NewService(application.NewGreetService(nopGreetingRepository{}))
-
-	res, err := service.Greet(context.Background(), &greetv1.GreetRequest{Name: "Ada"})
-	if err != nil {
-		t.Fatalf("Greet() error = %v", err)
-	}
-
-	if got, want := res.GetGreeting(), "Hello, Ada!"; got != want {
-		t.Errorf("Greeting = %q, want %q", got, want)
-	}
-}
-
-func TestServiceGreetRejectsMissingName(t *testing.T) {
-	t.Parallel()
-
-	service := NewService(application.NewGreetService(nopGreetingRepository{}))
-
-	_, err := service.Greet(context.Background(), &greetv1.GreetRequest{})
-	if got, want := connectrpc.CodeOf(err), connectrpc.CodeInvalidArgument; got != want {
-		t.Fatalf("Greet() error code = %v, want %v", got, want)
-	}
-}
-
-func TestServiceGreetAnswersAClientErrorWithAFixedMessage(t *testing.T) {
-	t.Parallel()
-
-	for name, cause := range map[string]error{
-		"wrapped": fmt.Errorf("build greeting: %w", domain.ErrGreetingNameRequired),
-		"joined":  errors.Join(errors.New("ERROR: deadlock detected (SQLSTATE 40P01)"), domain.ErrGreetingNameRequired),
-	} {
-		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-
-			service := NewService(failingGreetService{err: cause})
-
-			_, err := service.Greet(context.Background(), &greetv1.GreetRequest{Name: "Ada"})
-			assertConnectError(t, err, connectrpc.CodeInvalidArgument, "name is required")
-		})
-	}
-}
 
 // TestInternalErrorHidesDetail keeps the cause of an internal failure out of
 // the response and puts it in the server log instead. It cannot run in
 // parallel: it reads the log back through the process-wide default logger.
 func TestInternalErrorHidesDetail(t *testing.T) {
 	logs := captureLog(t)
-	service := NewService(failingGreetService{err: errors.New("secret detail")})
 
 	ctx := withSampledSpan(t, context.Background())
 
-	_, err := service.Greet(ctx, &greetv1.GreetRequest{Name: "Ada"})
+	err := InternalError(ctx, errors.New("secret detail"))
 	if got, want := connectrpc.CodeOf(err), connectrpc.CodeInternal; got != want {
-		t.Fatalf("Greet() error code = %v, want %v", got, want)
+		t.Fatalf("InternalError() code = %v, want %v", got, want)
 	}
 
-	var connectErr *connectrpc.Error
-	if !errors.As(err, &connectErr) {
-		t.Fatalf("Greet() error = %v, want a Connect error", err)
-	}
-
-	if got, want := connectErr.Message(), "internal error"; got != want {
+	if got, want := err.Message(), "internal error"; got != want {
 		t.Errorf("Message() = %q, want %q", got, want)
 	}
 
@@ -123,14 +70,13 @@ func TestCanceledRequestIsNotLogged(t *testing.T) {
 		code    connectrpc.Code
 		message string
 	}{
-		{fmt.Errorf("find greeting: %w", context.Canceled), connectrpc.CodeCanceled, "canceled"},
-		{fmt.Errorf("find greeting: %w", context.DeadlineExceeded), connectrpc.CodeDeadlineExceeded, "deadline exceeded"},
+		{fmt.Errorf("find guest message: %w", context.Canceled), connectrpc.CodeCanceled, "canceled"},
+		{fmt.Errorf("find guest message: %w", context.DeadlineExceeded), connectrpc.CodeDeadlineExceeded, "deadline exceeded"},
 	} {
 		t.Run(tc.code.String(), func(t *testing.T) {
 			logs := captureLog(t)
-			service := NewService(failingGreetService{err: tc.cause})
 
-			_, err := service.Greet(context.Background(), &greetv1.GreetRequest{Name: "Ada"})
+			err := InternalError(context.Background(), tc.cause)
 			assertConnectError(t, err, tc.code, tc.message)
 
 			if logs.Len() != 0 {
@@ -145,7 +91,7 @@ func assertConnectError(t *testing.T, err error, code connectrpc.Code, message s
 
 	var connectErr *connectrpc.Error
 	if !errors.As(err, &connectErr) {
-		t.Fatalf("Greet() error = %v, want a Connect error", err)
+		t.Fatalf("error = %v, want a Connect error", err)
 	}
 
 	if got := connectErr.Code(); got != code {
@@ -216,13 +162,4 @@ func withSampledSpan(t *testing.T, ctx context.Context) context.Context {
 		SpanID:     spanID,
 		TraceFlags: trace.FlagsSampled,
 	}))
-}
-
-// failingGreetService is a GreetUseCases whose every call fails with err.
-type failingGreetService struct {
-	err error
-}
-
-func (s failingGreetService) Greet(context.Context, application.GreetInput) (domain.Greeting, error) {
-	return domain.Greeting{}, s.err
 }

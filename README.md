@@ -42,7 +42,7 @@ task up:build
 サーバーは `http://localhost:8080`、PostgreSQL は `localhost:5432` で待ち受ける（停止は `task down`）  
 Compose の `migrate` サービスは `Dockerfile` の `migrate` ターゲットをビルドして起動するため、`migrations/` を追加・変更したあとは `--build` 付き（`docker compose up --build` または `task up:build`）で起動し直す  
 `task up` はイメージを再ビルドしないので、古いマイグレーションのままになる  
-RPC を呼び出すには Service Gateway 発行の内部 JWT が必要なので、`go tool jwtgen` で生成した JWKS を配信する URL を `INTERNAL_JWKS_URL` で `server` に渡す（「内部 JWT」を参照）
+`GuestSettingsService` の RPC を呼び出すには Service Gateway 発行の内部 JWT が必要なので、`go tool jwtgen` で生成した JWKS を配信する URL を `INTERNAL_JWKS_URL` で `server` に渡す（「内部 JWT」を参照）
 
 ### 環境変数
 
@@ -100,13 +100,13 @@ Jaeger UI は `http://localhost:16686`（停止は `task down:o11y`）
 
 ```bash
 # ES256 の内部 JWT と対応する JWKS ドキュメントを JSON で出力
-go tool jwtgen -audience tolo-guest -tenant-public-id 0123456789abcdef -scope <scope> -ttl 10m
+go tool jwtgen -audience tolo-guest -token-use event_access -tenant-public-id 0123456789abcdef -event-public-id fedcba9876543210 -subject staff-user-1 -scope events.read -ttl 10m
 ```
 
-- `-token-use` は `tenant_access`（既定）、`event_access`、`registration`、`service` を取る
-- `tenant_access` では `-tenant-public-id`（ランダムな 16 文字 hex）と `-scope` が必須である。必要な scope は proto の `required_scopes` で宣言されている
+- `-token-use` は `tenant_access`（既定）、`event_access`、`registration`、`service` を取る。`GuestPageService` の RPC は公開でトークンを要求しない。`GuestSettingsService` の RPC は `event_access` を要求する
+- `event_access` では `-tenant-public-id` と `-event-public-id`（どちらもランダムな 16 文字 hex）、`-scope` が必須である。必要な scope（`events.read`／`events.manage`）は proto の `required_scopes` で宣言されている
 - `-issuer` の既定は `service-gateway`、`-audience` に既定はないので `tolo-guest` を明示する
-- そのほかのフラグは `-event-public-id`、`-origin-sub`、`-subject`、`-txn`、`-kid`（既定 `test-key`）、`-ttl`（既定 2 分）である
+- そのほかのフラグは `-origin-sub`、`-subject`、`-txn`、`-kid`（既定 `test-key`）、`-ttl`（既定 2 分）である
 
 出力は `token` / `claims` / `jwks` を持つ JSON である  
 `jwks` を任意の HTTP エンドポイント（例: ローカルのファイルサーバ）で配信し、`INTERNAL_JWKS_URL` にその URL を設定すると、`Authorization: Bearer <token>` で呼び出せる

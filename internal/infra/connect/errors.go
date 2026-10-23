@@ -6,30 +6,10 @@ import (
 	"log/slog"
 
 	connectrpc "connectrpc.com/connect/v2"
-
-	"github.com/pj-hoakari/tolo-guest/internal/domain"
 )
 
 // errInternal is the only detail a client learns about an internal failure.
 var errInternal = errors.New("internal error")
-
-var clientErrors = []struct {
-	target  error
-	code    connectrpc.Code
-	message string
-}{
-	{domain.ErrGreetingNameRequired, connectrpc.CodeInvalidArgument, "name is required"},
-}
-
-func connectError(ctx context.Context, err error) *connectrpc.Error {
-	for _, e := range clientErrors {
-		if errors.Is(err, e.target) {
-			return connectrpc.NewError(e.code, e.message).WithCause(err)
-		}
-	}
-
-	return InternalError(ctx, err)
-}
 
 // InternalError reports a failure the client can do nothing about. The cause is
 // written to the server log and replaced by a fixed message, so that no
