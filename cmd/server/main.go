@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -23,6 +24,7 @@ const (
 	defaultAddr              = ":8080"
 	defaultLogLevel          = "info"
 	defaultReconcileInterval = 10 * time.Minute
+	defaultQrReportInterval  = 30 * time.Second
 	upstreamTimeout          = 10 * time.Second
 	shutdownTimeout          = 10 * time.Second
 	readHeaderTimeout        = 10 * time.Second
@@ -83,6 +85,15 @@ func run() error {
 		return errors.New("RECONCILE_INTERVAL must be positive")
 	}
 
+	qrReportInterval, err := time.ParseDuration(getenv("QR_REPORT_INTERVAL", defaultQrReportInterval.String()))
+	if err != nil {
+		return fmt.Errorf("read QR_REPORT_INTERVAL: %w", err)
+	}
+
+	if qrReportInterval <= 0 {
+		return errors.New("QR_REPORT_INTERVAL must be positive")
+	}
+
 	shutdownTracing, err := telemetry.Setup(ctx)
 	if err != nil {
 		return fmt.Errorf("setup tracing: %w", err)
@@ -106,29 +117,30 @@ func run() error {
 	guestSettings := dbinfra.NewPostgresGuestSettingsRepository(db)
 	upstream := &http.Client{Timeout: upstreamTimeout}
 	graphAuthoring := connectinfra.NewGraphAuthoringClient(upstream, graphAuthoringURL)
+	observation := connectinfra.NewObservationClient(upstream, observationURL)
+	qrAccesses := dbinfra.NewPostgresQrAccessRepository(db)
 	readModelRepository := dbinfra.NewPostgresGuestReadModelRepository(db)
 	readModel := application.NewGuestReadModelService(
 		readModelRepository,
 		guestSettings,
-		connectinfra.NewObservationClient(upstream, observationURL),
+		observation,
 		connectinfra.NewOperationClient(upstream, operationURL),
 		graphAuthoring,
 		graphAuthoring,
-		dbinfra.NewPostgresQrAccessRepository(db),
+		qrAccesses,
 	)
+	qrCounts := application.NewQrCountReporter(qrAccesses, observation)
 
-	reconcileCtx, stopReconcile := context.WithCancel(ctx)
-	reconciled := make(chan struct{})
+	backgroundCtx, stopBackground := context.WithCancel(ctx)
 
-	go func() {
-		defer close(reconciled)
+	var background sync.WaitGroup
 
-		readModel.RunReconciliation(reconcileCtx, reconcileInterval)
-	}()
+	background.Go(func() { readModel.RunReconciliation(backgroundCtx, reconcileInterval) })
+	background.Go(func() { qrCounts.RunQrCountReports(backgroundCtx, qrReportInterval) })
 
 	defer func() {
-		stopReconcile()
-		<-reconciled
+		stopBackground()
+		background.Wait()
 	}()
 
 	serviceRoutes, err := connectinfra.RoutesWithJWTSettings(

@@ -12,6 +12,7 @@ package application_test
 import (
 	context "context"
 	reflect "reflect"
+	time "time"
 
 	domain "github.com/pj-hoakari/tolo-guest/internal/domain"
 	gomock "go.uber.org/mock/gomock"
@@ -53,4 +54,57 @@ func (m *MockQrAccessRepository) RecordQrAccess(ctx context.Context, access doma
 func (mr *MockQrAccessRepositoryMockRecorder) RecordQrAccess(ctx, access any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RecordQrAccess", reflect.TypeOf((*MockQrAccessRepository)(nil).RecordQrAccess), ctx, access)
+}
+
+// MockUnreportedQrAccessRepository is a mock of UnreportedQrAccessRepository interface.
+type MockUnreportedQrAccessRepository struct {
+	ctrl     *gomock.Controller
+	recorder *MockUnreportedQrAccessRepositoryMockRecorder
+	isgomock struct{}
+}
+
+// MockUnreportedQrAccessRepositoryMockRecorder is the mock recorder for MockUnreportedQrAccessRepository.
+type MockUnreportedQrAccessRepositoryMockRecorder struct {
+	mock *MockUnreportedQrAccessRepository
+}
+
+// NewMockUnreportedQrAccessRepository creates a new mock instance.
+func NewMockUnreportedQrAccessRepository(ctrl *gomock.Controller) *MockUnreportedQrAccessRepository {
+	mock := &MockUnreportedQrAccessRepository{ctrl: ctrl}
+	mock.recorder = &MockUnreportedQrAccessRepositoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockUnreportedQrAccessRepository) EXPECT() *MockUnreportedQrAccessRepositoryMockRecorder {
+	return m.recorder
+}
+
+// DeleteQrAccesses mocks base method.
+func (m *MockUnreportedQrAccessRepository) DeleteQrAccesses(ctx context.Context, ids []int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteQrAccesses", ctx, ids)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteQrAccesses indicates an expected call of DeleteQrAccesses.
+func (mr *MockUnreportedQrAccessRepositoryMockRecorder) DeleteQrAccesses(ctx, ids any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteQrAccesses", reflect.TypeOf((*MockUnreportedQrAccessRepository)(nil).DeleteQrAccesses), ctx, ids)
+}
+
+// ListUnreportedQrAccesses mocks base method.
+func (m *MockUnreportedQrAccessRepository) ListUnreportedQrAccesses(ctx context.Context, openedBefore time.Time) ([]domain.RecordedQrAccess, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListUnreportedQrAccesses", ctx, openedBefore)
+	ret0, _ := ret[0].([]domain.RecordedQrAccess)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListUnreportedQrAccesses indicates an expected call of ListUnreportedQrAccesses.
+func (mr *MockUnreportedQrAccessRepositoryMockRecorder) ListUnreportedQrAccesses(ctx, openedBefore any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListUnreportedQrAccesses", reflect.TypeOf((*MockUnreportedQrAccessRepository)(nil).ListUnreportedQrAccesses), ctx, openedBefore)
 }

@@ -6,6 +6,7 @@ import (
 
 	connectrpc "connectrpc.com/connect/v2"
 	"connectrpc.com/connect/v2/connecthttp"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	graphv1 "github.com/pj-hoakari/tolo-graph-authoring/gen/tolo/graph/v1"
 	"github.com/pj-hoakari/tolo-graph-authoring/gen/tolo/graph/v1/graphv1connect"
@@ -14,6 +15,7 @@ import (
 	operationv1 "github.com/pj-hoakari/tolo-operation/gen/tolo/operation/v1"
 	"github.com/pj-hoakari/tolo-operation/gen/tolo/operation/v1/operationv1connect"
 
+	"github.com/pj-hoakari/tolo-guest/internal/application"
 	"github.com/pj-hoakari/tolo-guest/internal/domain"
 )
 
@@ -47,11 +49,51 @@ func declareCallerService() connectrpc.ClientInterceptor {
 }
 
 type ObservationClient struct {
-	client observationv1connect.StatusQueryServiceClient
+	client       observationv1connect.StatusQueryServiceClient
+	measurements observationv1connect.MeasurementIngestServiceClient
 }
 
 func NewObservationClient(httpClient connecthttp.HTTPClient, gatewayURL string) *ObservationClient {
-	return &ObservationClient{client: observationv1connect.NewStatusQueryServiceClient(newGatewayClient(httpClient, gatewayURL))}
+	gateway := newGatewayClient(httpClient, gatewayURL)
+
+	return &ObservationClient{
+		client:       observationv1connect.NewStatusQueryServiceClient(gateway),
+		measurements: observationv1connect.NewMeasurementIngestServiceClient(gateway),
+	}
+}
+
+func (c *ObservationClient) ReportQrCounts(ctx context.Context, tenantPublicID, eventID string, counts []domain.QrCount) error {
+	measurements := make([]*observationv1.Measurement, 0, len(counts))
+	for _, count := range counts {
+		measurements = append(measurements, &observationv1.Measurement{
+			ObservationPointId: "",
+			WindowStart:        timestamppb.New(count.WindowStart),
+			WindowEnd:          timestamppb.New(count.WindowEnd),
+			CountIn:            count.Count,
+			CountOut:           0,
+			Source:             observationv1.MeasurementSource_MEASUREMENT_SOURCE_QR,
+			QrLocationId:       count.QrLocationID,
+			MeanDetectedPeople: nil,
+		})
+	}
+
+	_, err := c.measurements.ReportMeasurements(ctx, &observationv1.ReportMeasurementsRequest{
+		EventId:      eventID,
+		EdgeDeviceId: "",
+		Measurements: measurements,
+		TenantId:     tenantPublicID,
+	})
+
+	if code := connectrpc.CodeOf(err); code == connectrpc.CodeInvalidArgument ||
+		code == connectrpc.CodePermissionDenied || code == connectrpc.CodeFailedPrecondition {
+		return fmt.Errorf("call ReportMeasurements: %w: %w", application.ErrQrCountsRefused, err)
+	}
+
+	if err != nil {
+		return fmt.Errorf("call ReportMeasurements: %w", err)
+	}
+
+	return nil
 }
 
 func (c *ObservationClient) GetGuestSnapshot(ctx context.Context, eventID string) (domain.GuestStatus, bool, error) {

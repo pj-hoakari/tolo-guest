@@ -2,6 +2,7 @@ package connect
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"reflect"
 	"testing"
@@ -18,6 +19,7 @@ import (
 	operationv1 "github.com/pj-hoakari/tolo-operation/gen/tolo/operation/v1"
 	"github.com/pj-hoakari/tolo-operation/gen/tolo/operation/v1/operationv1connect"
 
+	"github.com/pj-hoakari/tolo-guest/internal/application"
 	"github.com/pj-hoakari/tolo-guest/internal/domain"
 )
 
@@ -53,6 +55,29 @@ func (f *fakeStatusQuery) GetGuestSnapshot(
 	}
 
 	return &observationv1.GetGuestSnapshotResponse{Status: f.status}, nil
+}
+
+type fakeMeasurementIngest struct {
+	observationv1connect.UnimplementedMeasurementIngestServiceHandler
+
+	calls    chan upstreamCall
+	requests chan *observationv1.ReportMeasurementsRequest
+	refuse   connectrpc.Code
+}
+
+func (f *fakeMeasurementIngest) ReportMeasurements(
+	ctx context.Context,
+	req *observationv1.ReportMeasurementsRequest,
+) (*observationv1.ReportMeasurementsResponse, error) {
+	f.calls <- recordCall(ctx)
+
+	f.requests <- req
+
+	if f.refuse != 0 {
+		return nil, connectrpc.NewError(f.refuse, "refused")
+	}
+
+	return &observationv1.ReportMeasurementsResponse{AcceptedCount: int32(len(req.GetMeasurements()))}, nil
 }
 
 type fakeStaffCommunication struct {
@@ -195,6 +220,90 @@ func TestObservationClient(t *testing.T) {
 	}
 
 	assertNewMachineCaller(t, <-fake.calls)
+}
+
+func TestObservationClientReportsQrCounts(t *testing.T) {
+	t.Parallel()
+
+	start := time.Date(2026, 10, 23, 9, 0, 0, 0, time.UTC)
+	counts := []domain.QrCount{
+		{QrLocationID: "qr-east", WindowStart: start, WindowEnd: start.Add(time.Minute), Count: 3, AccessIDs: []int64{1, 2, 3}},
+		{QrLocationID: "qr-hall", WindowStart: start, WindowEnd: start.Add(time.Minute), Count: 1, AccessIDs: []int64{4}},
+	}
+
+	fake := &fakeMeasurementIngest{
+		calls:    make(chan upstreamCall, 1),
+		requests: make(chan *observationv1.ReportMeasurementsRequest, 1),
+	}
+	url := newGatewayServer(t, func(server *connectrpc.Server) {
+		observationv1connect.RegisterMeasurementIngestServiceHandler(server, fake)
+	})
+
+	err := NewObservationClient(http.DefaultClient, url).ReportQrCounts(authorized("Bearer leaked"), testTenantPublicID, testEventPublicID, counts)
+	if err != nil {
+		t.Fatalf("ReportQrCounts() error = %v", err)
+	}
+
+	assertNewMachineCaller(t, <-fake.calls)
+
+	req := <-fake.requests
+	if req.GetEventId() != testEventPublicID || req.GetTenantId() != testTenantPublicID || req.GetEdgeDeviceId() != "" {
+		t.Errorf("ReportMeasurements request = %v, want the event and its tenant without an edge device", req)
+	}
+
+	measurements := req.GetMeasurements()
+	if len(measurements) != len(counts) {
+		t.Fatalf("measurements = %v, want one per count", measurements)
+	}
+
+	for i, m := range measurements {
+		want := counts[i]
+		if m.GetSource() != observationv1.MeasurementSource_MEASUREMENT_SOURCE_QR || m.GetQrLocationId() != want.QrLocationID ||
+			m.GetObservationPointId() != "" || m.GetCountIn() != want.Count || m.GetCountOut() != 0 || m.MeanDetectedPeople != nil ||
+			!m.GetWindowStart().AsTime().Equal(want.WindowStart) || !m.GetWindowEnd().AsTime().Equal(want.WindowEnd) {
+			t.Errorf("measurement[%d] = %v, want a QR count of %+v with count_out 0", i, m, want)
+		}
+	}
+}
+
+func TestObservationClientMarksRefusedQrCounts(t *testing.T) {
+	t.Parallel()
+
+	start := time.Date(2026, 10, 23, 9, 0, 0, 0, time.UTC)
+	counts := []domain.QrCount{{QrLocationID: "qr-east", WindowStart: start, WindowEnd: start.Add(time.Minute), Count: 1, AccessIDs: []int64{1}}}
+
+	for _, tc := range []struct {
+		code    connectrpc.Code
+		refused bool
+	}{
+		{connectrpc.CodeInvalidArgument, true},
+		{connectrpc.CodePermissionDenied, true},
+		{connectrpc.CodeFailedPrecondition, true},
+		{connectrpc.CodeUnavailable, false},
+		{connectrpc.CodeUnauthenticated, false},
+	} {
+		t.Run(tc.code.String(), func(t *testing.T) {
+			t.Parallel()
+
+			fake := &fakeMeasurementIngest{
+				calls:    make(chan upstreamCall, 1),
+				requests: make(chan *observationv1.ReportMeasurementsRequest, 1),
+				refuse:   tc.code,
+			}
+			url := newGatewayServer(t, func(server *connectrpc.Server) {
+				observationv1connect.RegisterMeasurementIngestServiceHandler(server, fake)
+			})
+
+			err := NewObservationClient(http.DefaultClient, url).ReportQrCounts(context.Background(), testTenantPublicID, testEventPublicID, counts)
+			if err == nil {
+				t.Fatal("ReportQrCounts() error = nil, want the refusal")
+			}
+
+			if got := errors.Is(err, application.ErrQrCountsRefused); got != tc.refused {
+				t.Errorf("errors.Is(%v, ErrQrCountsRefused) = %v, want %v", err, got, tc.refused)
+			}
+		})
+	}
 }
 
 func TestOperationClient(t *testing.T) {
