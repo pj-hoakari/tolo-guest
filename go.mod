@@ -20,7 +20,8 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/pj-hoakari/internal-jwt-handling v0.4.0
 	github.com/pj-hoakari/protoc-gen-authz-go v0.3.0
-	github.com/pj-hoakari/tolo-graph-authoring v0.4.0-dev
+	github.com/pj-hoakari/tolo-graph-authoring v0.4.0-rc
+	github.com/pj-hoakari/tolo-kernel-proto v0.4.0
 	github.com/pj-hoakari/tolo-observation v0.4.0-rc
 	github.com/pj-hoakari/tolo-operation v0.2.0-dev
 	github.com/testcontainers/testcontainers-go v0.44.0
@@ -72,7 +73,6 @@ require (
 	github.com/moby/term v0.5.2 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
-	github.com/pj-hoakari/tolo-kernel-proto v0.4.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/shirou/gopsutil/v4 v4.26.6 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect
