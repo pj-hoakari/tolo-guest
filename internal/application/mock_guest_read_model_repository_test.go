@@ -69,6 +69,20 @@ func (mr *MockGuestReadModelRepositoryMockRecorder) ApplyStatus(ctx, status any)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ApplyStatus", reflect.TypeOf((*MockGuestReadModelRepository)(nil).ApplyStatus), ctx, status)
 }
 
+// DeleteGuideMap mocks base method.
+func (m *MockGuestReadModelRepository) DeleteGuideMap(ctx context.Context, eventID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteGuideMap", ctx, eventID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteGuideMap indicates an expected call of DeleteGuideMap.
+func (mr *MockGuestReadModelRepositoryMockRecorder) DeleteGuideMap(ctx, eventID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteGuideMap", reflect.TypeOf((*MockGuestReadModelRepository)(nil).DeleteGuideMap), ctx, eventID)
+}
+
 // FindDisplayNames mocks base method.
 func (m *MockGuestReadModelRepository) FindDisplayNames(ctx context.Context, eventID string) (domain.DisplayNames, error) {
 	m.ctrl.T.Helper()
@@ -82,6 +96,21 @@ func (m *MockGuestReadModelRepository) FindDisplayNames(ctx context.Context, eve
 func (mr *MockGuestReadModelRepositoryMockRecorder) FindDisplayNames(ctx, eventID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindDisplayNames", reflect.TypeOf((*MockGuestReadModelRepository)(nil).FindDisplayNames), ctx, eventID)
+}
+
+// FindGuideMap mocks base method.
+func (m *MockGuestReadModelRepository) FindGuideMap(ctx context.Context, eventID string) (domain.GuideMap, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindGuideMap", ctx, eventID)
+	ret0, _ := ret[0].(domain.GuideMap)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindGuideMap indicates an expected call of FindGuideMap.
+func (mr *MockGuestReadModelRepositoryMockRecorder) FindGuideMap(ctx, eventID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindGuideMap", reflect.TypeOf((*MockGuestReadModelRepository)(nil).FindGuideMap), ctx, eventID)
 }
 
 // FindQrLocations mocks base method.
@@ -170,6 +199,20 @@ func (m *MockGuestReadModelRepository) SaveDisplayNames(ctx context.Context, nam
 func (mr *MockGuestReadModelRepositoryMockRecorder) SaveDisplayNames(ctx, names any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveDisplayNames", reflect.TypeOf((*MockGuestReadModelRepository)(nil).SaveDisplayNames), ctx, names)
+}
+
+// SaveGuideMap mocks base method.
+func (m *MockGuestReadModelRepository) SaveGuideMap(ctx context.Context, guideMap domain.GuideMap) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveGuideMap", ctx, guideMap)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveGuideMap indicates an expected call of SaveGuideMap.
+func (mr *MockGuestReadModelRepositoryMockRecorder) SaveGuideMap(ctx, guideMap any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveGuideMap", reflect.TypeOf((*MockGuestReadModelRepository)(nil).SaveGuideMap), ctx, guideMap)
 }
 
 // SaveQrLocations mocks base method.

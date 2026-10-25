@@ -16,6 +16,12 @@ type GuestPageUseCases interface {
 	GetCrowd(ctx context.Context, eventID, language string) (domain.CrowdView, error)
 	GetQueues(ctx context.Context, eventID, language string) (domain.QueuesView, error)
 	ListGuestMessages(ctx context.Context, eventID string) ([]domain.GuestMessage, error)
+	GetGuideMap(ctx context.Context, eventID, qrLocationID string) (GuideMapView, error)
+}
+
+type GuideMapView struct {
+	GuideMap       domain.GuideMap
+	CurrentPointID string
 }
 
 func (s *GuestReadModelService) OpenGuestPage(
@@ -98,6 +104,34 @@ func (s *GuestReadModelService) ListGuestMessages(ctx context.Context, eventID s
 	}
 
 	return messages, nil
+}
+
+func (s *GuestReadModelService) GetGuideMap(ctx context.Context, eventID, qrLocationID string) (GuideMapView, error) {
+	if eventID == "" {
+		return GuideMapView{}, domain.ErrEventIDRequired
+	}
+
+	guideMap, err := s.readModel.FindGuideMap(ctx, eventID)
+	if err != nil {
+		return GuideMapView{}, fmt.Errorf("find guide map: %w", err)
+	}
+
+	view := GuideMapView{GuideMap: guideMap, CurrentPointID: ""}
+
+	locations, err := s.readModel.FindQrLocations(ctx, eventID)
+	if errors.Is(err, repository.ErrQrLocationsNotFound) {
+		return view, nil
+	}
+
+	if err != nil {
+		return GuideMapView{}, fmt.Errorf("find QR locations: %w", err)
+	}
+
+	if location, found := locations.Find(qrLocationID); found && qrLocationID != "" {
+		view.CurrentPointID = guideMap.CurrentPointID(location)
+	}
+
+	return view, nil
 }
 
 func (s *GuestReadModelService) findNamedStatus(

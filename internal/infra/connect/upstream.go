@@ -6,6 +6,7 @@ import (
 
 	connectrpc "connectrpc.com/connect/v2"
 	"connectrpc.com/connect/v2/connecthttp"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	graphv1 "github.com/pj-hoakari/tolo-graph-authoring/gen/tolo/graph/v1"
@@ -257,8 +258,53 @@ func (c *GraphAuthoringClient) GetQrLocations(
 			QrLocationID: location.GetQrLocationId(),
 			Name:         location.GetName(),
 			Kind:         location.GetKind(),
+			PointID:      location.GetAnchor().GetPointId(),
 		})
 	}
 
 	return domain.QrLocations{EventID: eventID, RevisionID: revisionID, Locations: locations}, true, nil
+}
+
+func (c *GraphAuthoringClient) GetGuideMap(
+	ctx context.Context,
+	tenantPublicID, eventID, revisionID string,
+) (*domain.GuideMap, bool, error) {
+	res, err := c.client.GetGuideMapLayout(ctx, &graphv1.GetGuideMapLayoutRequest{
+		EventId:    eventID,
+		RevisionId: revisionID,
+		TenantId:   tenantPublicID,
+	})
+	if connectrpc.CodeOf(err) == connectrpc.CodeNotFound {
+		return nil, false, nil
+	}
+
+	if err != nil {
+		return nil, false, fmt.Errorf("call GetGuideMapLayout: %w", err)
+	}
+
+	if res.GetGuideMapLayout() == nil {
+		return nil, true, nil
+	}
+
+	encoded, err := proto.Marshal(guideMapLayoutFromGraph(res.GetGuideMapLayout()))
+	if err != nil {
+		return nil, false, fmt.Errorf("encode guide map layout: %w", err)
+	}
+
+	return &domain.GuideMap{
+		EventID:       eventID,
+		RevisionID:    revisionID,
+		EncodedLayout: encoded,
+		Points:        localizedTexts(res.GetPointLabels()),
+		Groups:        localizedTexts(res.GetGroupLabels()),
+	}, true, nil
+}
+
+func localizedTexts(texts map[string]*graphv1.LocalizedText) map[string]domain.LocalizedText {
+	converted := make(map[string]domain.LocalizedText, len(texts))
+	for id, text := range texts {
+		converted[id] = text.GetTexts()
+	}
+
+	return converted
 }

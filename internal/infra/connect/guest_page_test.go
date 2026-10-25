@@ -27,6 +27,7 @@ type memoryReadModel struct {
 	names    map[string]domain.DisplayNames
 	messages map[string][]domain.GuestMessage
 	qr       map[string]domain.QrLocations
+	maps     map[string]domain.GuideMap
 	accesses []domain.QrAccess
 }
 
@@ -36,11 +37,12 @@ func newMemoryReadModel() *memoryReadModel {
 		names:    map[string]domain.DisplayNames{},
 		messages: map[string][]domain.GuestMessage{},
 		qr:       map[string]domain.QrLocations{},
+		maps:     map[string]domain.GuideMap{},
 	}
 }
 
 func newGuestPageUseCases(readModel *memoryReadModel) *application.GuestReadModelService {
-	return application.NewGuestReadModelService(readModel, &memoryGuestSettings{byEvent: map[string]domain.GuestSettings{}}, nil, nil, nil, nil, readModel, application.NewQrOpenLimiter(time.Now))
+	return application.NewGuestReadModelService(readModel, &memoryGuestSettings{byEvent: map[string]domain.GuestSettings{}}, nil, nil, nil, nil, nil, readModel, application.NewQrOpenLimiter(time.Now))
 }
 
 func (m *memoryReadModel) RecordQrAccess(_ context.Context, access domain.QrAccess) error {
@@ -142,6 +144,36 @@ func (m *memoryReadModel) FindQrLocations(_ context.Context, eventID string) (do
 	}
 
 	return locations, nil
+}
+
+func (m *memoryReadModel) SaveGuideMap(_ context.Context, guideMap domain.GuideMap) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.maps[guideMap.EventID] = guideMap
+
+	return nil
+}
+
+func (m *memoryReadModel) FindGuideMap(_ context.Context, eventID string) (domain.GuideMap, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	guideMap, ok := m.maps[eventID]
+	if !ok {
+		return domain.GuideMap{}, repository.ErrGuideMapNotFound
+	}
+
+	return guideMap, nil
+}
+
+func (m *memoryReadModel) DeleteGuideMap(_ context.Context, eventID string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	delete(m.maps, eventID)
+
+	return nil
 }
 
 func newGuestPageClient(t *testing.T) guestv1connect.GuestPageServiceClient {
@@ -312,7 +344,7 @@ func TestOpenGuestPage(t *testing.T) {
 	routes, err := RoutesWithVerifier(
 		newTestVerifier(t, internaljwt.JWKS{}),
 		newGuestSettingsUseCases(),
-		application.NewGuestReadModelService(readModel, settings, nil, nil, nil, nil, readModel, application.NewQrOpenLimiter(time.Now)),
+		application.NewGuestReadModelService(readModel, settings, nil, nil, nil, nil, nil, readModel, application.NewQrOpenLimiter(time.Now)),
 	)
 	if err != nil {
 		t.Fatalf("RoutesWithVerifier() error = %v", err)

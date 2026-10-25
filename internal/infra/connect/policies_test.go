@@ -22,6 +22,7 @@ func TestGeneratedPoliciesMatchTheSpecification(t *testing.T) {
 		guestv1connect.GuestPageServiceGetCrowdProcedure:                public,
 		guestv1connect.GuestPageServiceGetQueuesProcedure:               public,
 		guestv1connect.GuestPageServiceListGuestMessagesProcedure:       public,
+		guestv1connect.GuestPageServiceGetGuideMapProcedure:             public,
 		guestv1connect.GuestSettingsServiceGetGuestSettingsProcedure:    eventAccess("events.read"),
 		guestv1connect.GuestSettingsServiceUpdateGuestSettingsProcedure: eventAccess("events.manage"),
 		guestv1connect.GuestSettingsServiceListIssuedUrlsProcedure:      eventAccess("events.read"),

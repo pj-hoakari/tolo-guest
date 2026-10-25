@@ -127,6 +127,7 @@ func run() error {
 		connectinfra.NewOperationClient(upstream, operationURL),
 		graphAuthoring,
 		graphAuthoring,
+		graphAuthoring,
 		qrAccesses,
 		application.NewQrOpenLimiter(time.Now),
 	)

@@ -175,3 +175,43 @@ func (mr *MockQrLocationSourceMockRecorder) GetQrLocations(ctx, tenantPublicID, 
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetQrLocations", reflect.TypeOf((*MockQrLocationSource)(nil).GetQrLocations), ctx, tenantPublicID, eventID, revisionID)
 }
+
+// MockGuideMapSource is a mock of GuideMapSource interface.
+type MockGuideMapSource struct {
+	ctrl     *gomock.Controller
+	recorder *MockGuideMapSourceMockRecorder
+	isgomock struct{}
+}
+
+// MockGuideMapSourceMockRecorder is the mock recorder for MockGuideMapSource.
+type MockGuideMapSourceMockRecorder struct {
+	mock *MockGuideMapSource
+}
+
+// NewMockGuideMapSource creates a new mock instance.
+func NewMockGuideMapSource(ctrl *gomock.Controller) *MockGuideMapSource {
+	mock := &MockGuideMapSource{ctrl: ctrl}
+	mock.recorder = &MockGuideMapSourceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockGuideMapSource) EXPECT() *MockGuideMapSourceMockRecorder {
+	return m.recorder
+}
+
+// GetGuideMap mocks base method.
+func (m *MockGuideMapSource) GetGuideMap(ctx context.Context, tenantPublicID, eventID, revisionID string) (*domain.GuideMap, bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetGuideMap", ctx, tenantPublicID, eventID, revisionID)
+	ret0, _ := ret[0].(*domain.GuideMap)
+	ret1, _ := ret[1].(bool)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetGuideMap indicates an expected call of GetGuideMap.
+func (mr *MockGuideMapSourceMockRecorder) GetGuideMap(ctx, tenantPublicID, eventID, revisionID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGuideMap", reflect.TypeOf((*MockGuideMapSource)(nil).GetGuideMap), ctx, tenantPublicID, eventID, revisionID)
+}
