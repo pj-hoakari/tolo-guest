@@ -11,6 +11,7 @@ type QrLocation struct {
 	QrLocationID string
 	Name         string
 	Kind         string
+	PointID      string
 }
 
 type QrLocations struct {

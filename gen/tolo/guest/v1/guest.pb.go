@@ -127,6 +127,162 @@ func (CrowdLevel) EnumDescriptor() ([]byte, []int) {
 	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{1}
 }
 
+type GuideMapPlaceShape int32
+
+const (
+	GuideMapPlaceShape_GUIDE_MAP_PLACE_SHAPE_UNSPECIFIED GuideMapPlaceShape = 0
+	GuideMapPlaceShape_GUIDE_MAP_PLACE_SHAPE_PIN         GuideMapPlaceShape = 1
+	GuideMapPlaceShape_GUIDE_MAP_PLACE_SHAPE_RECT        GuideMapPlaceShape = 2
+	GuideMapPlaceShape_GUIDE_MAP_PLACE_SHAPE_CIRCLE      GuideMapPlaceShape = 3
+)
+
+// Enum value maps for GuideMapPlaceShape.
+var (
+	GuideMapPlaceShape_name = map[int32]string{
+		0: "GUIDE_MAP_PLACE_SHAPE_UNSPECIFIED",
+		1: "GUIDE_MAP_PLACE_SHAPE_PIN",
+		2: "GUIDE_MAP_PLACE_SHAPE_RECT",
+		3: "GUIDE_MAP_PLACE_SHAPE_CIRCLE",
+	}
+	GuideMapPlaceShape_value = map[string]int32{
+		"GUIDE_MAP_PLACE_SHAPE_UNSPECIFIED": 0,
+		"GUIDE_MAP_PLACE_SHAPE_PIN":         1,
+		"GUIDE_MAP_PLACE_SHAPE_RECT":        2,
+		"GUIDE_MAP_PLACE_SHAPE_CIRCLE":      3,
+	}
+)
+
+func (x GuideMapPlaceShape) Enum() *GuideMapPlaceShape {
+	p := new(GuideMapPlaceShape)
+	*p = x
+	return p
+}
+
+func (x GuideMapPlaceShape) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (GuideMapPlaceShape) Descriptor() protoreflect.EnumDescriptor {
+	return file_tolo_guest_v1_guest_proto_enumTypes[2].Descriptor()
+}
+
+func (GuideMapPlaceShape) Type() protoreflect.EnumType {
+	return &file_tolo_guest_v1_guest_proto_enumTypes[2]
+}
+
+func (x GuideMapPlaceShape) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use GuideMapPlaceShape.Descriptor instead.
+func (GuideMapPlaceShape) EnumDescriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{2}
+}
+
+type GuideMapConnectorType int32
+
+const (
+	GuideMapConnectorType_GUIDE_MAP_CONNECTOR_TYPE_UNSPECIFIED GuideMapConnectorType = 0
+	GuideMapConnectorType_GUIDE_MAP_CONNECTOR_TYPE_STAIRS      GuideMapConnectorType = 1
+	GuideMapConnectorType_GUIDE_MAP_CONNECTOR_TYPE_ESCALATOR   GuideMapConnectorType = 2
+	GuideMapConnectorType_GUIDE_MAP_CONNECTOR_TYPE_ELEVATOR    GuideMapConnectorType = 3
+)
+
+// Enum value maps for GuideMapConnectorType.
+var (
+	GuideMapConnectorType_name = map[int32]string{
+		0: "GUIDE_MAP_CONNECTOR_TYPE_UNSPECIFIED",
+		1: "GUIDE_MAP_CONNECTOR_TYPE_STAIRS",
+		2: "GUIDE_MAP_CONNECTOR_TYPE_ESCALATOR",
+		3: "GUIDE_MAP_CONNECTOR_TYPE_ELEVATOR",
+	}
+	GuideMapConnectorType_value = map[string]int32{
+		"GUIDE_MAP_CONNECTOR_TYPE_UNSPECIFIED": 0,
+		"GUIDE_MAP_CONNECTOR_TYPE_STAIRS":      1,
+		"GUIDE_MAP_CONNECTOR_TYPE_ESCALATOR":   2,
+		"GUIDE_MAP_CONNECTOR_TYPE_ELEVATOR":    3,
+	}
+)
+
+func (x GuideMapConnectorType) Enum() *GuideMapConnectorType {
+	p := new(GuideMapConnectorType)
+	*p = x
+	return p
+}
+
+func (x GuideMapConnectorType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (GuideMapConnectorType) Descriptor() protoreflect.EnumDescriptor {
+	return file_tolo_guest_v1_guest_proto_enumTypes[3].Descriptor()
+}
+
+func (GuideMapConnectorType) Type() protoreflect.EnumType {
+	return &file_tolo_guest_v1_guest_proto_enumTypes[3]
+}
+
+func (x GuideMapConnectorType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use GuideMapConnectorType.Descriptor instead.
+func (GuideMapConnectorType) EnumDescriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{3}
+}
+
+type GuideMapConnectorDirection int32
+
+const (
+	GuideMapConnectorDirection_GUIDE_MAP_CONNECTOR_DIRECTION_UNSPECIFIED GuideMapConnectorDirection = 0
+	GuideMapConnectorDirection_GUIDE_MAP_CONNECTOR_DIRECTION_BOTH        GuideMapConnectorDirection = 1
+	GuideMapConnectorDirection_GUIDE_MAP_CONNECTOR_DIRECTION_UP          GuideMapConnectorDirection = 2
+	GuideMapConnectorDirection_GUIDE_MAP_CONNECTOR_DIRECTION_DOWN        GuideMapConnectorDirection = 3
+)
+
+// Enum value maps for GuideMapConnectorDirection.
+var (
+	GuideMapConnectorDirection_name = map[int32]string{
+		0: "GUIDE_MAP_CONNECTOR_DIRECTION_UNSPECIFIED",
+		1: "GUIDE_MAP_CONNECTOR_DIRECTION_BOTH",
+		2: "GUIDE_MAP_CONNECTOR_DIRECTION_UP",
+		3: "GUIDE_MAP_CONNECTOR_DIRECTION_DOWN",
+	}
+	GuideMapConnectorDirection_value = map[string]int32{
+		"GUIDE_MAP_CONNECTOR_DIRECTION_UNSPECIFIED": 0,
+		"GUIDE_MAP_CONNECTOR_DIRECTION_BOTH":        1,
+		"GUIDE_MAP_CONNECTOR_DIRECTION_UP":          2,
+		"GUIDE_MAP_CONNECTOR_DIRECTION_DOWN":        3,
+	}
+)
+
+func (x GuideMapConnectorDirection) Enum() *GuideMapConnectorDirection {
+	p := new(GuideMapConnectorDirection)
+	*p = x
+	return p
+}
+
+func (x GuideMapConnectorDirection) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (GuideMapConnectorDirection) Descriptor() protoreflect.EnumDescriptor {
+	return file_tolo_guest_v1_guest_proto_enumTypes[4].Descriptor()
+}
+
+func (GuideMapConnectorDirection) Type() protoreflect.EnumType {
+	return &file_tolo_guest_v1_guest_proto_enumTypes[4]
+}
+
+func (x GuideMapConnectorDirection) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use GuideMapConnectorDirection.Descriptor instead.
+func (GuideMapConnectorDirection) EnumDescriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{4}
+}
+
 type OpenGuestPageRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
@@ -829,6 +985,940 @@ func (x *GuestMessage) GetSentAt() *timestamppb.Timestamp {
 	return nil
 }
 
+type GetGuideMapRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
+	QrLocationId  string                 `protobuf:"bytes,2,opt,name=qr_location_id,json=qrLocationId,proto3" json:"qr_location_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetGuideMapRequest) Reset() {
+	*x = GetGuideMapRequest{}
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetGuideMapRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetGuideMapRequest) ProtoMessage() {}
+
+func (x *GetGuideMapRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetGuideMapRequest.ProtoReflect.Descriptor instead.
+func (*GetGuideMapRequest) Descriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *GetGuideMapRequest) GetEventId() string {
+	if x != nil {
+		return x.EventId
+	}
+	return ""
+}
+
+func (x *GetGuideMapRequest) GetQrLocationId() string {
+	if x != nil {
+		return x.QrLocationId
+	}
+	return ""
+}
+
+type GetGuideMapResponse struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Graph          *GuideMapGraph         `protobuf:"bytes,1,opt,name=graph,proto3" json:"graph,omitempty"`
+	Layout         *GuideMapLayout        `protobuf:"bytes,2,opt,name=layout,proto3" json:"layout,omitempty"`
+	CurrentPointId string                 `protobuf:"bytes,3,opt,name=current_point_id,json=currentPointId,proto3" json:"current_point_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *GetGuideMapResponse) Reset() {
+	*x = GetGuideMapResponse{}
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetGuideMapResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetGuideMapResponse) ProtoMessage() {}
+
+func (x *GetGuideMapResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetGuideMapResponse.ProtoReflect.Descriptor instead.
+func (*GetGuideMapResponse) Descriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *GetGuideMapResponse) GetGraph() *GuideMapGraph {
+	if x != nil {
+		return x.Graph
+	}
+	return nil
+}
+
+func (x *GetGuideMapResponse) GetLayout() *GuideMapLayout {
+	if x != nil {
+		return x.Layout
+	}
+	return nil
+}
+
+func (x *GetGuideMapResponse) GetCurrentPointId() string {
+	if x != nil {
+		return x.CurrentPointId
+	}
+	return ""
+}
+
+type GuideMapGraph struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Points        []*GuideMapPointLabels `protobuf:"bytes,1,rep,name=points,proto3" json:"points,omitempty"`
+	Groups        []*GuideMapGroupLabels `protobuf:"bytes,2,rep,name=groups,proto3" json:"groups,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GuideMapGraph) Reset() {
+	*x = GuideMapGraph{}
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GuideMapGraph) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GuideMapGraph) ProtoMessage() {}
+
+func (x *GuideMapGraph) ProtoReflect() protoreflect.Message {
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GuideMapGraph.ProtoReflect.Descriptor instead.
+func (*GuideMapGraph) Descriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *GuideMapGraph) GetPoints() []*GuideMapPointLabels {
+	if x != nil {
+		return x.Points
+	}
+	return nil
+}
+
+func (x *GuideMapGraph) GetGroups() []*GuideMapGroupLabels {
+	if x != nil {
+		return x.Groups
+	}
+	return nil
+}
+
+type GuideMapPointLabels struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PointId       string                 `protobuf:"bytes,1,opt,name=point_id,json=pointId,proto3" json:"point_id,omitempty"`
+	Labels        map[string]string      `protobuf:"bytes,2,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GuideMapPointLabels) Reset() {
+	*x = GuideMapPointLabels{}
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GuideMapPointLabels) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GuideMapPointLabels) ProtoMessage() {}
+
+func (x *GuideMapPointLabels) ProtoReflect() protoreflect.Message {
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GuideMapPointLabels.ProtoReflect.Descriptor instead.
+func (*GuideMapPointLabels) Descriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *GuideMapPointLabels) GetPointId() string {
+	if x != nil {
+		return x.PointId
+	}
+	return ""
+}
+
+func (x *GuideMapPointLabels) GetLabels() map[string]string {
+	if x != nil {
+		return x.Labels
+	}
+	return nil
+}
+
+type GuideMapGroupLabels struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	Labels        map[string]string      `protobuf:"bytes,2,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GuideMapGroupLabels) Reset() {
+	*x = GuideMapGroupLabels{}
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GuideMapGroupLabels) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GuideMapGroupLabels) ProtoMessage() {}
+
+func (x *GuideMapGroupLabels) ProtoReflect() protoreflect.Message {
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GuideMapGroupLabels.ProtoReflect.Descriptor instead.
+func (*GuideMapGroupLabels) Descriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *GuideMapGroupLabels) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+func (x *GuideMapGroupLabels) GetLabels() map[string]string {
+	if x != nil {
+		return x.Labels
+	}
+	return nil
+}
+
+type GuideMapLayout struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Groups        []*GuideMapGroup       `protobuf:"bytes,1,rep,name=groups,proto3" json:"groups,omitempty"`
+	Objects       []*GuideMapObject      `protobuf:"bytes,2,rep,name=objects,proto3" json:"objects,omitempty"`
+	North         float64                `protobuf:"fixed64,3,opt,name=north,proto3" json:"north,omitempty"`
+	Scale         float64                `protobuf:"fixed64,4,opt,name=scale,proto3" json:"scale,omitempty"`
+	StartObjectId string                 `protobuf:"bytes,5,opt,name=start_object_id,json=startObjectId,proto3" json:"start_object_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GuideMapLayout) Reset() {
+	*x = GuideMapLayout{}
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GuideMapLayout) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GuideMapLayout) ProtoMessage() {}
+
+func (x *GuideMapLayout) ProtoReflect() protoreflect.Message {
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GuideMapLayout.ProtoReflect.Descriptor instead.
+func (*GuideMapLayout) Descriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *GuideMapLayout) GetGroups() []*GuideMapGroup {
+	if x != nil {
+		return x.Groups
+	}
+	return nil
+}
+
+func (x *GuideMapLayout) GetObjects() []*GuideMapObject {
+	if x != nil {
+		return x.Objects
+	}
+	return nil
+}
+
+func (x *GuideMapLayout) GetNorth() float64 {
+	if x != nil {
+		return x.North
+	}
+	return 0
+}
+
+func (x *GuideMapLayout) GetScale() float64 {
+	if x != nil {
+		return x.Scale
+	}
+	return 0
+}
+
+func (x *GuideMapLayout) GetStartObjectId() string {
+	if x != nil {
+		return x.StartObjectId
+	}
+	return ""
+}
+
+type GuideMapGroup struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	GroupId       string                 `protobuf:"bytes,1,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GuideMapGroup) Reset() {
+	*x = GuideMapGroup{}
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GuideMapGroup) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GuideMapGroup) ProtoMessage() {}
+
+func (x *GuideMapGroup) ProtoReflect() protoreflect.Message {
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GuideMapGroup.ProtoReflect.Descriptor instead.
+func (*GuideMapGroup) Descriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *GuideMapGroup) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+type GuideMapObject struct {
+	state       protoimpl.MessageState `protogen:"open.v1"`
+	ObjectId    string                 `protobuf:"bytes,1,opt,name=object_id,json=objectId,proto3" json:"object_id,omitempty"`
+	GroupId     string                 `protobuf:"bytes,2,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"`
+	Title       map[string]string      `protobuf:"bytes,3,rep,name=title,proto3" json:"title,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Description map[string]string      `protobuf:"bytes,4,rep,name=description,proto3" json:"description,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Color       string                 `protobuf:"bytes,5,opt,name=color,proto3" json:"color,omitempty"`
+	Closed      bool                   `protobuf:"varint,6,opt,name=closed,proto3" json:"closed,omitempty"`
+	PointId     string                 `protobuf:"bytes,7,opt,name=point_id,json=pointId,proto3" json:"point_id,omitempty"`
+	RouteId     string                 `protobuf:"bytes,8,opt,name=route_id,json=routeId,proto3" json:"route_id,omitempty"`
+	// Types that are valid to be assigned to Kind:
+	//
+	//	*GuideMapObject_Place
+	//	*GuideMapObject_Line
+	//	*GuideMapObject_Area
+	//	*GuideMapObject_Text
+	Kind          isGuideMapObject_Kind `protobuf_oneof:"kind"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GuideMapObject) Reset() {
+	*x = GuideMapObject{}
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GuideMapObject) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GuideMapObject) ProtoMessage() {}
+
+func (x *GuideMapObject) ProtoReflect() protoreflect.Message {
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GuideMapObject.ProtoReflect.Descriptor instead.
+func (*GuideMapObject) Descriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *GuideMapObject) GetObjectId() string {
+	if x != nil {
+		return x.ObjectId
+	}
+	return ""
+}
+
+func (x *GuideMapObject) GetGroupId() string {
+	if x != nil {
+		return x.GroupId
+	}
+	return ""
+}
+
+func (x *GuideMapObject) GetTitle() map[string]string {
+	if x != nil {
+		return x.Title
+	}
+	return nil
+}
+
+func (x *GuideMapObject) GetDescription() map[string]string {
+	if x != nil {
+		return x.Description
+	}
+	return nil
+}
+
+func (x *GuideMapObject) GetColor() string {
+	if x != nil {
+		return x.Color
+	}
+	return ""
+}
+
+func (x *GuideMapObject) GetClosed() bool {
+	if x != nil {
+		return x.Closed
+	}
+	return false
+}
+
+func (x *GuideMapObject) GetPointId() string {
+	if x != nil {
+		return x.PointId
+	}
+	return ""
+}
+
+func (x *GuideMapObject) GetRouteId() string {
+	if x != nil {
+		return x.RouteId
+	}
+	return ""
+}
+
+func (x *GuideMapObject) GetKind() isGuideMapObject_Kind {
+	if x != nil {
+		return x.Kind
+	}
+	return nil
+}
+
+func (x *GuideMapObject) GetPlace() *GuideMapPlace {
+	if x != nil {
+		if x, ok := x.Kind.(*GuideMapObject_Place); ok {
+			return x.Place
+		}
+	}
+	return nil
+}
+
+func (x *GuideMapObject) GetLine() *GuideMapLine {
+	if x != nil {
+		if x, ok := x.Kind.(*GuideMapObject_Line); ok {
+			return x.Line
+		}
+	}
+	return nil
+}
+
+func (x *GuideMapObject) GetArea() *GuideMapArea {
+	if x != nil {
+		if x, ok := x.Kind.(*GuideMapObject_Area); ok {
+			return x.Area
+		}
+	}
+	return nil
+}
+
+func (x *GuideMapObject) GetText() *GuideMapText {
+	if x != nil {
+		if x, ok := x.Kind.(*GuideMapObject_Text); ok {
+			return x.Text
+		}
+	}
+	return nil
+}
+
+type isGuideMapObject_Kind interface {
+	isGuideMapObject_Kind()
+}
+
+type GuideMapObject_Place struct {
+	Place *GuideMapPlace `protobuf:"bytes,9,opt,name=place,proto3,oneof"`
+}
+
+type GuideMapObject_Line struct {
+	Line *GuideMapLine `protobuf:"bytes,10,opt,name=line,proto3,oneof"`
+}
+
+type GuideMapObject_Area struct {
+	Area *GuideMapArea `protobuf:"bytes,11,opt,name=area,proto3,oneof"`
+}
+
+type GuideMapObject_Text struct {
+	Text *GuideMapText `protobuf:"bytes,12,opt,name=text,proto3,oneof"`
+}
+
+func (*GuideMapObject_Place) isGuideMapObject_Kind() {}
+
+func (*GuideMapObject_Line) isGuideMapObject_Kind() {}
+
+func (*GuideMapObject_Area) isGuideMapObject_Kind() {}
+
+func (*GuideMapObject_Text) isGuideMapObject_Kind() {}
+
+type GuideMapPosition struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	X             float64                `protobuf:"fixed64,1,opt,name=x,proto3" json:"x,omitempty"`
+	Y             float64                `protobuf:"fixed64,2,opt,name=y,proto3" json:"y,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GuideMapPosition) Reset() {
+	*x = GuideMapPosition{}
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GuideMapPosition) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GuideMapPosition) ProtoMessage() {}
+
+func (x *GuideMapPosition) ProtoReflect() protoreflect.Message {
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GuideMapPosition.ProtoReflect.Descriptor instead.
+func (*GuideMapPosition) Descriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *GuideMapPosition) GetX() float64 {
+	if x != nil {
+		return x.X
+	}
+	return 0
+}
+
+func (x *GuideMapPosition) GetY() float64 {
+	if x != nil {
+		return x.Y
+	}
+	return 0
+}
+
+type GuideMapPlace struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Center        *GuideMapPosition      `protobuf:"bytes,1,opt,name=center,proto3" json:"center,omitempty"`
+	Shape         GuideMapPlaceShape     `protobuf:"varint,2,opt,name=shape,proto3,enum=tolo.guest.v1.GuideMapPlaceShape" json:"shape,omitempty"`
+	Width         float64                `protobuf:"fixed64,3,opt,name=width,proto3" json:"width,omitempty"`
+	Height        float64                `protobuf:"fixed64,4,opt,name=height,proto3" json:"height,omitempty"`
+	Pin           bool                   `protobuf:"varint,5,opt,name=pin,proto3" json:"pin,omitempty"`
+	Connector     *GuideMapConnector     `protobuf:"bytes,6,opt,name=connector,proto3" json:"connector,omitempty"`
+	MarkWidth     *float64               `protobuf:"fixed64,7,opt,name=mark_width,json=markWidth,proto3,oneof" json:"mark_width,omitempty"`
+	MarkHeight    *float64               `protobuf:"fixed64,8,opt,name=mark_height,json=markHeight,proto3,oneof" json:"mark_height,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GuideMapPlace) Reset() {
+	*x = GuideMapPlace{}
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GuideMapPlace) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GuideMapPlace) ProtoMessage() {}
+
+func (x *GuideMapPlace) ProtoReflect() protoreflect.Message {
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GuideMapPlace.ProtoReflect.Descriptor instead.
+func (*GuideMapPlace) Descriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *GuideMapPlace) GetCenter() *GuideMapPosition {
+	if x != nil {
+		return x.Center
+	}
+	return nil
+}
+
+func (x *GuideMapPlace) GetShape() GuideMapPlaceShape {
+	if x != nil {
+		return x.Shape
+	}
+	return GuideMapPlaceShape_GUIDE_MAP_PLACE_SHAPE_UNSPECIFIED
+}
+
+func (x *GuideMapPlace) GetWidth() float64 {
+	if x != nil {
+		return x.Width
+	}
+	return 0
+}
+
+func (x *GuideMapPlace) GetHeight() float64 {
+	if x != nil {
+		return x.Height
+	}
+	return 0
+}
+
+func (x *GuideMapPlace) GetPin() bool {
+	if x != nil {
+		return x.Pin
+	}
+	return false
+}
+
+func (x *GuideMapPlace) GetConnector() *GuideMapConnector {
+	if x != nil {
+		return x.Connector
+	}
+	return nil
+}
+
+func (x *GuideMapPlace) GetMarkWidth() float64 {
+	if x != nil && x.MarkWidth != nil {
+		return *x.MarkWidth
+	}
+	return 0
+}
+
+func (x *GuideMapPlace) GetMarkHeight() float64 {
+	if x != nil && x.MarkHeight != nil {
+		return *x.MarkHeight
+	}
+	return 0
+}
+
+type GuideMapConnector struct {
+	state         protoimpl.MessageState     `protogen:"open.v1"`
+	Type          GuideMapConnectorType      `protobuf:"varint,1,opt,name=type,proto3,enum=tolo.guest.v1.GuideMapConnectorType" json:"type,omitempty"`
+	Link          string                     `protobuf:"bytes,2,opt,name=link,proto3" json:"link,omitempty"`
+	Direction     GuideMapConnectorDirection `protobuf:"varint,3,opt,name=direction,proto3,enum=tolo.guest.v1.GuideMapConnectorDirection" json:"direction,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GuideMapConnector) Reset() {
+	*x = GuideMapConnector{}
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GuideMapConnector) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GuideMapConnector) ProtoMessage() {}
+
+func (x *GuideMapConnector) ProtoReflect() protoreflect.Message {
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GuideMapConnector.ProtoReflect.Descriptor instead.
+func (*GuideMapConnector) Descriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *GuideMapConnector) GetType() GuideMapConnectorType {
+	if x != nil {
+		return x.Type
+	}
+	return GuideMapConnectorType_GUIDE_MAP_CONNECTOR_TYPE_UNSPECIFIED
+}
+
+func (x *GuideMapConnector) GetLink() string {
+	if x != nil {
+		return x.Link
+	}
+	return ""
+}
+
+func (x *GuideMapConnector) GetDirection() GuideMapConnectorDirection {
+	if x != nil {
+		return x.Direction
+	}
+	return GuideMapConnectorDirection_GUIDE_MAP_CONNECTOR_DIRECTION_UNSPECIFIED
+}
+
+type GuideMapLine struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Points        []*GuideMapPosition    `protobuf:"bytes,1,rep,name=points,proto3" json:"points,omitempty"`
+	Width         float64                `protobuf:"fixed64,2,opt,name=width,proto3" json:"width,omitempty"`
+	Dash          bool                   `protobuf:"varint,3,opt,name=dash,proto3" json:"dash,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GuideMapLine) Reset() {
+	*x = GuideMapLine{}
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GuideMapLine) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GuideMapLine) ProtoMessage() {}
+
+func (x *GuideMapLine) ProtoReflect() protoreflect.Message {
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GuideMapLine.ProtoReflect.Descriptor instead.
+func (*GuideMapLine) Descriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *GuideMapLine) GetPoints() []*GuideMapPosition {
+	if x != nil {
+		return x.Points
+	}
+	return nil
+}
+
+func (x *GuideMapLine) GetWidth() float64 {
+	if x != nil {
+		return x.Width
+	}
+	return 0
+}
+
+func (x *GuideMapLine) GetDash() bool {
+	if x != nil {
+		return x.Dash
+	}
+	return false
+}
+
+type GuideMapArea struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Points        []*GuideMapPosition    `protobuf:"bytes,1,rep,name=points,proto3" json:"points,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GuideMapArea) Reset() {
+	*x = GuideMapArea{}
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GuideMapArea) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GuideMapArea) ProtoMessage() {}
+
+func (x *GuideMapArea) ProtoReflect() protoreflect.Message {
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GuideMapArea.ProtoReflect.Descriptor instead.
+func (*GuideMapArea) Descriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *GuideMapArea) GetPoints() []*GuideMapPosition {
+	if x != nil {
+		return x.Points
+	}
+	return nil
+}
+
+type GuideMapText struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Position      *GuideMapPosition      `protobuf:"bytes,1,opt,name=position,proto3" json:"position,omitempty"`
+	Size          float64                `protobuf:"fixed64,2,opt,name=size,proto3" json:"size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GuideMapText) Reset() {
+	*x = GuideMapText{}
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GuideMapText) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GuideMapText) ProtoMessage() {}
+
+func (x *GuideMapText) ProtoReflect() protoreflect.Message {
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GuideMapText.ProtoReflect.Descriptor instead.
+func (*GuideMapText) Descriptor() ([]byte, []int) {
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *GuideMapText) GetPosition() *GuideMapPosition {
+	if x != nil {
+		return x.Position
+	}
+	return nil
+}
+
+func (x *GuideMapText) GetSize() float64 {
+	if x != nil {
+		return x.Size
+	}
+	return 0
+}
+
 type GetGuestSettingsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	EventId       string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
@@ -838,7 +1928,7 @@ type GetGuestSettingsRequest struct {
 
 func (x *GetGuestSettingsRequest) Reset() {
 	*x = GetGuestSettingsRequest{}
-	mi := &file_tolo_guest_v1_guest_proto_msgTypes[12]
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -850,7 +1940,7 @@ func (x *GetGuestSettingsRequest) String() string {
 func (*GetGuestSettingsRequest) ProtoMessage() {}
 
 func (x *GetGuestSettingsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tolo_guest_v1_guest_proto_msgTypes[12]
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -863,7 +1953,7 @@ func (x *GetGuestSettingsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetGuestSettingsRequest.ProtoReflect.Descriptor instead.
 func (*GetGuestSettingsRequest) Descriptor() ([]byte, []int) {
-	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{12}
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *GetGuestSettingsRequest) GetEventId() string {
@@ -883,7 +1973,7 @@ type UpdateGuestSettingsRequest struct {
 
 func (x *UpdateGuestSettingsRequest) Reset() {
 	*x = UpdateGuestSettingsRequest{}
-	mi := &file_tolo_guest_v1_guest_proto_msgTypes[13]
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -895,7 +1985,7 @@ func (x *UpdateGuestSettingsRequest) String() string {
 func (*UpdateGuestSettingsRequest) ProtoMessage() {}
 
 func (x *UpdateGuestSettingsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tolo_guest_v1_guest_proto_msgTypes[13]
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -908,7 +1998,7 @@ func (x *UpdateGuestSettingsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateGuestSettingsRequest.ProtoReflect.Descriptor instead.
 func (*UpdateGuestSettingsRequest) Descriptor() ([]byte, []int) {
-	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{13}
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *UpdateGuestSettingsRequest) GetEventId() string {
@@ -935,7 +2025,7 @@ type GuestSettings struct {
 
 func (x *GuestSettings) Reset() {
 	*x = GuestSettings{}
-	mi := &file_tolo_guest_v1_guest_proto_msgTypes[14]
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -947,7 +2037,7 @@ func (x *GuestSettings) String() string {
 func (*GuestSettings) ProtoMessage() {}
 
 func (x *GuestSettings) ProtoReflect() protoreflect.Message {
-	mi := &file_tolo_guest_v1_guest_proto_msgTypes[14]
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -960,7 +2050,7 @@ func (x *GuestSettings) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GuestSettings.ProtoReflect.Descriptor instead.
 func (*GuestSettings) Descriptor() ([]byte, []int) {
-	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{14}
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *GuestSettings) GetEventId() string {
@@ -987,7 +2077,7 @@ type PageComposition struct {
 
 func (x *PageComposition) Reset() {
 	*x = PageComposition{}
-	mi := &file_tolo_guest_v1_guest_proto_msgTypes[15]
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -999,7 +2089,7 @@ func (x *PageComposition) String() string {
 func (*PageComposition) ProtoMessage() {}
 
 func (x *PageComposition) ProtoReflect() protoreflect.Message {
-	mi := &file_tolo_guest_v1_guest_proto_msgTypes[15]
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1012,7 +2102,7 @@ func (x *PageComposition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PageComposition.ProtoReflect.Descriptor instead.
 func (*PageComposition) Descriptor() ([]byte, []int) {
-	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{15}
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *PageComposition) GetKind() string {
@@ -1038,7 +2128,7 @@ type ListIssuedUrlsRequest struct {
 
 func (x *ListIssuedUrlsRequest) Reset() {
 	*x = ListIssuedUrlsRequest{}
-	mi := &file_tolo_guest_v1_guest_proto_msgTypes[16]
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1050,7 +2140,7 @@ func (x *ListIssuedUrlsRequest) String() string {
 func (*ListIssuedUrlsRequest) ProtoMessage() {}
 
 func (x *ListIssuedUrlsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_tolo_guest_v1_guest_proto_msgTypes[16]
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1063,7 +2153,7 @@ func (x *ListIssuedUrlsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListIssuedUrlsRequest.ProtoReflect.Descriptor instead.
 func (*ListIssuedUrlsRequest) Descriptor() ([]byte, []int) {
-	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{16}
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *ListIssuedUrlsRequest) GetEventId() string {
@@ -1082,7 +2172,7 @@ type ListIssuedUrlsResponse struct {
 
 func (x *ListIssuedUrlsResponse) Reset() {
 	*x = ListIssuedUrlsResponse{}
-	mi := &file_tolo_guest_v1_guest_proto_msgTypes[17]
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1094,7 +2184,7 @@ func (x *ListIssuedUrlsResponse) String() string {
 func (*ListIssuedUrlsResponse) ProtoMessage() {}
 
 func (x *ListIssuedUrlsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_tolo_guest_v1_guest_proto_msgTypes[17]
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1107,7 +2197,7 @@ func (x *ListIssuedUrlsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListIssuedUrlsResponse.ProtoReflect.Descriptor instead.
 func (*ListIssuedUrlsResponse) Descriptor() ([]byte, []int) {
-	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{17}
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *ListIssuedUrlsResponse) GetIssuedUrls() []*IssuedUrl {
@@ -1129,7 +2219,7 @@ type IssuedUrl struct {
 
 func (x *IssuedUrl) Reset() {
 	*x = IssuedUrl{}
-	mi := &file_tolo_guest_v1_guest_proto_msgTypes[18]
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1141,7 +2231,7 @@ func (x *IssuedUrl) String() string {
 func (*IssuedUrl) ProtoMessage() {}
 
 func (x *IssuedUrl) ProtoReflect() protoreflect.Message {
-	mi := &file_tolo_guest_v1_guest_proto_msgTypes[18]
+	mi := &file_tolo_guest_v1_guest_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1154,7 +2244,7 @@ func (x *IssuedUrl) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IssuedUrl.ProtoReflect.Descriptor instead.
 func (*IssuedUrl) Descriptor() ([]byte, []int) {
-	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{18}
+	return file_tolo_guest_v1_guest_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *IssuedUrl) GetQrLocationId() string {
@@ -1236,7 +2326,88 @@ const file_tolo_guest_v1_guest_proto_rawDesc = "" +
 	"\n" +
 	"message_id\x18\x01 \x01(\tR\tmessageId\x12\x12\n" +
 	"\x04body\x18\x02 \x01(\tR\x04body\x123\n" +
-	"\asent_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x06sentAt\"4\n" +
+	"\asent_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x06sentAt\"U\n" +
+	"\x12GetGuideMapRequest\x12\x19\n" +
+	"\bevent_id\x18\x01 \x01(\tR\aeventId\x12$\n" +
+	"\x0eqr_location_id\x18\x02 \x01(\tR\fqrLocationId\"\xaa\x01\n" +
+	"\x13GetGuideMapResponse\x122\n" +
+	"\x05graph\x18\x01 \x01(\v2\x1c.tolo.guest.v1.GuideMapGraphR\x05graph\x125\n" +
+	"\x06layout\x18\x02 \x01(\v2\x1d.tolo.guest.v1.GuideMapLayoutR\x06layout\x12(\n" +
+	"\x10current_point_id\x18\x03 \x01(\tR\x0ecurrentPointId\"\x87\x01\n" +
+	"\rGuideMapGraph\x12:\n" +
+	"\x06points\x18\x01 \x03(\v2\".tolo.guest.v1.GuideMapPointLabelsR\x06points\x12:\n" +
+	"\x06groups\x18\x02 \x03(\v2\".tolo.guest.v1.GuideMapGroupLabelsR\x06groups\"\xb3\x01\n" +
+	"\x13GuideMapPointLabels\x12\x19\n" +
+	"\bpoint_id\x18\x01 \x01(\tR\apointId\x12F\n" +
+	"\x06labels\x18\x02 \x03(\v2..tolo.guest.v1.GuideMapPointLabels.LabelsEntryR\x06labels\x1a9\n" +
+	"\vLabelsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xb3\x01\n" +
+	"\x13GuideMapGroupLabels\x12\x19\n" +
+	"\bgroup_id\x18\x01 \x01(\tR\agroupId\x12F\n" +
+	"\x06labels\x18\x02 \x03(\v2..tolo.guest.v1.GuideMapGroupLabels.LabelsEntryR\x06labels\x1a9\n" +
+	"\vLabelsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xd3\x01\n" +
+	"\x0eGuideMapLayout\x124\n" +
+	"\x06groups\x18\x01 \x03(\v2\x1c.tolo.guest.v1.GuideMapGroupR\x06groups\x127\n" +
+	"\aobjects\x18\x02 \x03(\v2\x1d.tolo.guest.v1.GuideMapObjectR\aobjects\x12\x14\n" +
+	"\x05north\x18\x03 \x01(\x01R\x05north\x12\x14\n" +
+	"\x05scale\x18\x04 \x01(\x01R\x05scale\x12&\n" +
+	"\x0fstart_object_id\x18\x05 \x01(\tR\rstartObjectId\"*\n" +
+	"\rGuideMapGroup\x12\x19\n" +
+	"\bgroup_id\x18\x01 \x01(\tR\agroupId\"\x8f\x05\n" +
+	"\x0eGuideMapObject\x12\x1b\n" +
+	"\tobject_id\x18\x01 \x01(\tR\bobjectId\x12\x19\n" +
+	"\bgroup_id\x18\x02 \x01(\tR\agroupId\x12>\n" +
+	"\x05title\x18\x03 \x03(\v2(.tolo.guest.v1.GuideMapObject.TitleEntryR\x05title\x12P\n" +
+	"\vdescription\x18\x04 \x03(\v2..tolo.guest.v1.GuideMapObject.DescriptionEntryR\vdescription\x12\x14\n" +
+	"\x05color\x18\x05 \x01(\tR\x05color\x12\x16\n" +
+	"\x06closed\x18\x06 \x01(\bR\x06closed\x12\x19\n" +
+	"\bpoint_id\x18\a \x01(\tR\apointId\x12\x19\n" +
+	"\broute_id\x18\b \x01(\tR\arouteId\x124\n" +
+	"\x05place\x18\t \x01(\v2\x1c.tolo.guest.v1.GuideMapPlaceH\x00R\x05place\x121\n" +
+	"\x04line\x18\n" +
+	" \x01(\v2\x1b.tolo.guest.v1.GuideMapLineH\x00R\x04line\x121\n" +
+	"\x04area\x18\v \x01(\v2\x1b.tolo.guest.v1.GuideMapAreaH\x00R\x04area\x121\n" +
+	"\x04text\x18\f \x01(\v2\x1b.tolo.guest.v1.GuideMapTextH\x00R\x04text\x1a8\n" +
+	"\n" +
+	"TitleEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a>\n" +
+	"\x10DescriptionEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\x06\n" +
+	"\x04kind\".\n" +
+	"\x10GuideMapPosition\x12\f\n" +
+	"\x01x\x18\x01 \x01(\x01R\x01x\x12\f\n" +
+	"\x01y\x18\x02 \x01(\x01R\x01y\"\xea\x02\n" +
+	"\rGuideMapPlace\x127\n" +
+	"\x06center\x18\x01 \x01(\v2\x1f.tolo.guest.v1.GuideMapPositionR\x06center\x127\n" +
+	"\x05shape\x18\x02 \x01(\x0e2!.tolo.guest.v1.GuideMapPlaceShapeR\x05shape\x12\x14\n" +
+	"\x05width\x18\x03 \x01(\x01R\x05width\x12\x16\n" +
+	"\x06height\x18\x04 \x01(\x01R\x06height\x12\x10\n" +
+	"\x03pin\x18\x05 \x01(\bR\x03pin\x12>\n" +
+	"\tconnector\x18\x06 \x01(\v2 .tolo.guest.v1.GuideMapConnectorR\tconnector\x12\"\n" +
+	"\n" +
+	"mark_width\x18\a \x01(\x01H\x00R\tmarkWidth\x88\x01\x01\x12$\n" +
+	"\vmark_height\x18\b \x01(\x01H\x01R\n" +
+	"markHeight\x88\x01\x01B\r\n" +
+	"\v_mark_widthB\x0e\n" +
+	"\f_mark_height\"\xaa\x01\n" +
+	"\x11GuideMapConnector\x128\n" +
+	"\x04type\x18\x01 \x01(\x0e2$.tolo.guest.v1.GuideMapConnectorTypeR\x04type\x12\x12\n" +
+	"\x04link\x18\x02 \x01(\tR\x04link\x12G\n" +
+	"\tdirection\x18\x03 \x01(\x0e2).tolo.guest.v1.GuideMapConnectorDirectionR\tdirection\"q\n" +
+	"\fGuideMapLine\x127\n" +
+	"\x06points\x18\x01 \x03(\v2\x1f.tolo.guest.v1.GuideMapPositionR\x06points\x12\x14\n" +
+	"\x05width\x18\x02 \x01(\x01R\x05width\x12\x12\n" +
+	"\x04dash\x18\x03 \x01(\bR\x04dash\"G\n" +
+	"\fGuideMapArea\x127\n" +
+	"\x06points\x18\x01 \x03(\v2\x1f.tolo.guest.v1.GuideMapPositionR\x06points\"_\n" +
+	"\fGuideMapText\x12;\n" +
+	"\bposition\x18\x01 \x01(\v2\x1f.tolo.guest.v1.GuideMapPositionR\bposition\x12\x12\n" +
+	"\x04size\x18\x02 \x01(\x01R\x04size\"4\n" +
 	"\x17GetGuestSettingsRequest\x12\x19\n" +
 	"\bevent_id\x18\x01 \x01(\tR\aeventId\"\x84\x01\n" +
 	"\x1aUpdateGuestSettingsRequest\x12\x19\n" +
@@ -1270,12 +2441,28 @@ const file_tolo_guest_v1_guest_proto_rawDesc = "" +
 	"\x17CROWD_LEVEL_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fCROWD_LEVEL_LOW\x10\x01\x12\x13\n" +
 	"\x0fCROWD_LEVEL_MID\x10\x02\x12\x14\n" +
-	"\x10CROWD_LEVEL_HIGH\x10\x032\x93\x03\n" +
+	"\x10CROWD_LEVEL_HIGH\x10\x03*\x9c\x01\n" +
+	"\x12GuideMapPlaceShape\x12%\n" +
+	"!GUIDE_MAP_PLACE_SHAPE_UNSPECIFIED\x10\x00\x12\x1d\n" +
+	"\x19GUIDE_MAP_PLACE_SHAPE_PIN\x10\x01\x12\x1e\n" +
+	"\x1aGUIDE_MAP_PLACE_SHAPE_RECT\x10\x02\x12 \n" +
+	"\x1cGUIDE_MAP_PLACE_SHAPE_CIRCLE\x10\x03*\xb5\x01\n" +
+	"\x15GuideMapConnectorType\x12(\n" +
+	"$GUIDE_MAP_CONNECTOR_TYPE_UNSPECIFIED\x10\x00\x12#\n" +
+	"\x1fGUIDE_MAP_CONNECTOR_TYPE_STAIRS\x10\x01\x12&\n" +
+	"\"GUIDE_MAP_CONNECTOR_TYPE_ESCALATOR\x10\x02\x12%\n" +
+	"!GUIDE_MAP_CONNECTOR_TYPE_ELEVATOR\x10\x03*\xc1\x01\n" +
+	"\x1aGuideMapConnectorDirection\x12-\n" +
+	")GUIDE_MAP_CONNECTOR_DIRECTION_UNSPECIFIED\x10\x00\x12&\n" +
+	"\"GUIDE_MAP_CONNECTOR_DIRECTION_BOTH\x10\x01\x12$\n" +
+	" GUIDE_MAP_CONNECTOR_DIRECTION_UP\x10\x02\x12&\n" +
+	"\"GUIDE_MAP_CONNECTOR_DIRECTION_DOWN\x10\x032\xf1\x03\n" +
 	"\x10GuestPageService\x12b\n" +
 	"\rOpenGuestPage\x12#.tolo.guest.v1.OpenGuestPageRequest\x1a$.tolo.guest.v1.OpenGuestPageResponse\"\x06\x8a\xb5\x18\x02\b\x01\x12S\n" +
 	"\bGetCrowd\x12\x1e.tolo.guest.v1.GetCrowdRequest\x1a\x1f.tolo.guest.v1.GetCrowdResponse\"\x06\x8a\xb5\x18\x02\b\x01\x12V\n" +
 	"\tGetQueues\x12\x1f.tolo.guest.v1.GetQueuesRequest\x1a .tolo.guest.v1.GetQueuesResponse\"\x06\x8a\xb5\x18\x02\b\x01\x12n\n" +
-	"\x11ListGuestMessages\x12'.tolo.guest.v1.ListGuestMessagesRequest\x1a(.tolo.guest.v1.ListGuestMessagesResponse\"\x06\x8a\xb5\x18\x02\b\x012\x9c\x03\n" +
+	"\x11ListGuestMessages\x12'.tolo.guest.v1.ListGuestMessagesRequest\x1a(.tolo.guest.v1.ListGuestMessagesResponse\"\x06\x8a\xb5\x18\x02\b\x01\x12\\\n" +
+	"\vGetGuideMap\x12!.tolo.guest.v1.GetGuideMapRequest\x1a\".tolo.guest.v1.GetGuideMapResponse\"\x06\x8a\xb5\x18\x02\b\x012\x9c\x03\n" +
 	"\x14GuestSettingsService\x12{\n" +
 	"\x10GetGuestSettings\x12&.tolo.guest.v1.GetGuestSettingsRequest\x1a\x1c.tolo.guest.v1.GuestSettings\"!\x8a\xb5\x18\x1d\b\x02\x12\vevents.read\x1a\fevent_access\x12\x83\x01\n" +
 	"\x13UpdateGuestSettings\x12).tolo.guest.v1.UpdateGuestSettingsRequest\x1a\x1c.tolo.guest.v1.GuestSettings\"#\x8a\xb5\x18\x1f\b\x02\x12\revents.manage\x1a\fevent_access\x12\x80\x01\n" +
@@ -1295,65 +2482,110 @@ func file_tolo_guest_v1_guest_proto_rawDescGZIP() []byte {
 	return file_tolo_guest_v1_guest_proto_rawDescData
 }
 
-var file_tolo_guest_v1_guest_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_tolo_guest_v1_guest_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
+var file_tolo_guest_v1_guest_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
+var file_tolo_guest_v1_guest_proto_msgTypes = make([]protoimpl.MessageInfo, 37)
 var file_tolo_guest_v1_guest_proto_goTypes = []any{
 	(GuestComponent)(0),                // 0: tolo.guest.v1.GuestComponent
 	(CrowdLevel)(0),                    // 1: tolo.guest.v1.CrowdLevel
-	(*OpenGuestPageRequest)(nil),       // 2: tolo.guest.v1.OpenGuestPageRequest
-	(*OpenGuestPageResponse)(nil),      // 3: tolo.guest.v1.OpenGuestPageResponse
-	(*GetCrowdRequest)(nil),            // 4: tolo.guest.v1.GetCrowdRequest
-	(*GetCrowdResponse)(nil),           // 5: tolo.guest.v1.GetCrowdResponse
-	(*Crowd)(nil),                      // 6: tolo.guest.v1.Crowd
-	(*GetQueuesRequest)(nil),           // 7: tolo.guest.v1.GetQueuesRequest
-	(*GetQueuesResponse)(nil),          // 8: tolo.guest.v1.GetQueuesResponse
-	(*Queue)(nil),                      // 9: tolo.guest.v1.Queue
-	(*QueueGate)(nil),                  // 10: tolo.guest.v1.QueueGate
-	(*ListGuestMessagesRequest)(nil),   // 11: tolo.guest.v1.ListGuestMessagesRequest
-	(*ListGuestMessagesResponse)(nil),  // 12: tolo.guest.v1.ListGuestMessagesResponse
-	(*GuestMessage)(nil),               // 13: tolo.guest.v1.GuestMessage
-	(*GetGuestSettingsRequest)(nil),    // 14: tolo.guest.v1.GetGuestSettingsRequest
-	(*UpdateGuestSettingsRequest)(nil), // 15: tolo.guest.v1.UpdateGuestSettingsRequest
-	(*GuestSettings)(nil),              // 16: tolo.guest.v1.GuestSettings
-	(*PageComposition)(nil),            // 17: tolo.guest.v1.PageComposition
-	(*ListIssuedUrlsRequest)(nil),      // 18: tolo.guest.v1.ListIssuedUrlsRequest
-	(*ListIssuedUrlsResponse)(nil),     // 19: tolo.guest.v1.ListIssuedUrlsResponse
-	(*IssuedUrl)(nil),                  // 20: tolo.guest.v1.IssuedUrl
-	(*timestamppb.Timestamp)(nil),      // 21: google.protobuf.Timestamp
+	(GuideMapPlaceShape)(0),            // 2: tolo.guest.v1.GuideMapPlaceShape
+	(GuideMapConnectorType)(0),         // 3: tolo.guest.v1.GuideMapConnectorType
+	(GuideMapConnectorDirection)(0),    // 4: tolo.guest.v1.GuideMapConnectorDirection
+	(*OpenGuestPageRequest)(nil),       // 5: tolo.guest.v1.OpenGuestPageRequest
+	(*OpenGuestPageResponse)(nil),      // 6: tolo.guest.v1.OpenGuestPageResponse
+	(*GetCrowdRequest)(nil),            // 7: tolo.guest.v1.GetCrowdRequest
+	(*GetCrowdResponse)(nil),           // 8: tolo.guest.v1.GetCrowdResponse
+	(*Crowd)(nil),                      // 9: tolo.guest.v1.Crowd
+	(*GetQueuesRequest)(nil),           // 10: tolo.guest.v1.GetQueuesRequest
+	(*GetQueuesResponse)(nil),          // 11: tolo.guest.v1.GetQueuesResponse
+	(*Queue)(nil),                      // 12: tolo.guest.v1.Queue
+	(*QueueGate)(nil),                  // 13: tolo.guest.v1.QueueGate
+	(*ListGuestMessagesRequest)(nil),   // 14: tolo.guest.v1.ListGuestMessagesRequest
+	(*ListGuestMessagesResponse)(nil),  // 15: tolo.guest.v1.ListGuestMessagesResponse
+	(*GuestMessage)(nil),               // 16: tolo.guest.v1.GuestMessage
+	(*GetGuideMapRequest)(nil),         // 17: tolo.guest.v1.GetGuideMapRequest
+	(*GetGuideMapResponse)(nil),        // 18: tolo.guest.v1.GetGuideMapResponse
+	(*GuideMapGraph)(nil),              // 19: tolo.guest.v1.GuideMapGraph
+	(*GuideMapPointLabels)(nil),        // 20: tolo.guest.v1.GuideMapPointLabels
+	(*GuideMapGroupLabels)(nil),        // 21: tolo.guest.v1.GuideMapGroupLabels
+	(*GuideMapLayout)(nil),             // 22: tolo.guest.v1.GuideMapLayout
+	(*GuideMapGroup)(nil),              // 23: tolo.guest.v1.GuideMapGroup
+	(*GuideMapObject)(nil),             // 24: tolo.guest.v1.GuideMapObject
+	(*GuideMapPosition)(nil),           // 25: tolo.guest.v1.GuideMapPosition
+	(*GuideMapPlace)(nil),              // 26: tolo.guest.v1.GuideMapPlace
+	(*GuideMapConnector)(nil),          // 27: tolo.guest.v1.GuideMapConnector
+	(*GuideMapLine)(nil),               // 28: tolo.guest.v1.GuideMapLine
+	(*GuideMapArea)(nil),               // 29: tolo.guest.v1.GuideMapArea
+	(*GuideMapText)(nil),               // 30: tolo.guest.v1.GuideMapText
+	(*GetGuestSettingsRequest)(nil),    // 31: tolo.guest.v1.GetGuestSettingsRequest
+	(*UpdateGuestSettingsRequest)(nil), // 32: tolo.guest.v1.UpdateGuestSettingsRequest
+	(*GuestSettings)(nil),              // 33: tolo.guest.v1.GuestSettings
+	(*PageComposition)(nil),            // 34: tolo.guest.v1.PageComposition
+	(*ListIssuedUrlsRequest)(nil),      // 35: tolo.guest.v1.ListIssuedUrlsRequest
+	(*ListIssuedUrlsResponse)(nil),     // 36: tolo.guest.v1.ListIssuedUrlsResponse
+	(*IssuedUrl)(nil),                  // 37: tolo.guest.v1.IssuedUrl
+	nil,                                // 38: tolo.guest.v1.GuideMapPointLabels.LabelsEntry
+	nil,                                // 39: tolo.guest.v1.GuideMapGroupLabels.LabelsEntry
+	nil,                                // 40: tolo.guest.v1.GuideMapObject.TitleEntry
+	nil,                                // 41: tolo.guest.v1.GuideMapObject.DescriptionEntry
+	(*timestamppb.Timestamp)(nil),      // 42: google.protobuf.Timestamp
 }
 var file_tolo_guest_v1_guest_proto_depIdxs = []int32{
 	0,  // 0: tolo.guest.v1.OpenGuestPageResponse.components:type_name -> tolo.guest.v1.GuestComponent
-	21, // 1: tolo.guest.v1.GetCrowdResponse.taken_at:type_name -> google.protobuf.Timestamp
-	6,  // 2: tolo.guest.v1.GetCrowdResponse.crowd:type_name -> tolo.guest.v1.Crowd
+	42, // 1: tolo.guest.v1.GetCrowdResponse.taken_at:type_name -> google.protobuf.Timestamp
+	9,  // 2: tolo.guest.v1.GetCrowdResponse.crowd:type_name -> tolo.guest.v1.Crowd
 	1,  // 3: tolo.guest.v1.Crowd.level:type_name -> tolo.guest.v1.CrowdLevel
-	21, // 4: tolo.guest.v1.GetQueuesResponse.taken_at:type_name -> google.protobuf.Timestamp
-	9,  // 5: tolo.guest.v1.GetQueuesResponse.queues:type_name -> tolo.guest.v1.Queue
-	10, // 6: tolo.guest.v1.Queue.gates:type_name -> tolo.guest.v1.QueueGate
-	13, // 7: tolo.guest.v1.ListGuestMessagesResponse.messages:type_name -> tolo.guest.v1.GuestMessage
-	21, // 8: tolo.guest.v1.GuestMessage.sent_at:type_name -> google.protobuf.Timestamp
-	17, // 9: tolo.guest.v1.UpdateGuestSettingsRequest.page_compositions:type_name -> tolo.guest.v1.PageComposition
-	17, // 10: tolo.guest.v1.GuestSettings.page_compositions:type_name -> tolo.guest.v1.PageComposition
-	0,  // 11: tolo.guest.v1.PageComposition.components:type_name -> tolo.guest.v1.GuestComponent
-	20, // 12: tolo.guest.v1.ListIssuedUrlsResponse.issued_urls:type_name -> tolo.guest.v1.IssuedUrl
-	2,  // 13: tolo.guest.v1.GuestPageService.OpenGuestPage:input_type -> tolo.guest.v1.OpenGuestPageRequest
-	4,  // 14: tolo.guest.v1.GuestPageService.GetCrowd:input_type -> tolo.guest.v1.GetCrowdRequest
-	7,  // 15: tolo.guest.v1.GuestPageService.GetQueues:input_type -> tolo.guest.v1.GetQueuesRequest
-	11, // 16: tolo.guest.v1.GuestPageService.ListGuestMessages:input_type -> tolo.guest.v1.ListGuestMessagesRequest
-	14, // 17: tolo.guest.v1.GuestSettingsService.GetGuestSettings:input_type -> tolo.guest.v1.GetGuestSettingsRequest
-	15, // 18: tolo.guest.v1.GuestSettingsService.UpdateGuestSettings:input_type -> tolo.guest.v1.UpdateGuestSettingsRequest
-	18, // 19: tolo.guest.v1.GuestSettingsService.ListIssuedUrls:input_type -> tolo.guest.v1.ListIssuedUrlsRequest
-	3,  // 20: tolo.guest.v1.GuestPageService.OpenGuestPage:output_type -> tolo.guest.v1.OpenGuestPageResponse
-	5,  // 21: tolo.guest.v1.GuestPageService.GetCrowd:output_type -> tolo.guest.v1.GetCrowdResponse
-	8,  // 22: tolo.guest.v1.GuestPageService.GetQueues:output_type -> tolo.guest.v1.GetQueuesResponse
-	12, // 23: tolo.guest.v1.GuestPageService.ListGuestMessages:output_type -> tolo.guest.v1.ListGuestMessagesResponse
-	16, // 24: tolo.guest.v1.GuestSettingsService.GetGuestSettings:output_type -> tolo.guest.v1.GuestSettings
-	16, // 25: tolo.guest.v1.GuestSettingsService.UpdateGuestSettings:output_type -> tolo.guest.v1.GuestSettings
-	19, // 26: tolo.guest.v1.GuestSettingsService.ListIssuedUrls:output_type -> tolo.guest.v1.ListIssuedUrlsResponse
-	20, // [20:27] is the sub-list for method output_type
-	13, // [13:20] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	42, // 4: tolo.guest.v1.GetQueuesResponse.taken_at:type_name -> google.protobuf.Timestamp
+	12, // 5: tolo.guest.v1.GetQueuesResponse.queues:type_name -> tolo.guest.v1.Queue
+	13, // 6: tolo.guest.v1.Queue.gates:type_name -> tolo.guest.v1.QueueGate
+	16, // 7: tolo.guest.v1.ListGuestMessagesResponse.messages:type_name -> tolo.guest.v1.GuestMessage
+	42, // 8: tolo.guest.v1.GuestMessage.sent_at:type_name -> google.protobuf.Timestamp
+	19, // 9: tolo.guest.v1.GetGuideMapResponse.graph:type_name -> tolo.guest.v1.GuideMapGraph
+	22, // 10: tolo.guest.v1.GetGuideMapResponse.layout:type_name -> tolo.guest.v1.GuideMapLayout
+	20, // 11: tolo.guest.v1.GuideMapGraph.points:type_name -> tolo.guest.v1.GuideMapPointLabels
+	21, // 12: tolo.guest.v1.GuideMapGraph.groups:type_name -> tolo.guest.v1.GuideMapGroupLabels
+	38, // 13: tolo.guest.v1.GuideMapPointLabels.labels:type_name -> tolo.guest.v1.GuideMapPointLabels.LabelsEntry
+	39, // 14: tolo.guest.v1.GuideMapGroupLabels.labels:type_name -> tolo.guest.v1.GuideMapGroupLabels.LabelsEntry
+	23, // 15: tolo.guest.v1.GuideMapLayout.groups:type_name -> tolo.guest.v1.GuideMapGroup
+	24, // 16: tolo.guest.v1.GuideMapLayout.objects:type_name -> tolo.guest.v1.GuideMapObject
+	40, // 17: tolo.guest.v1.GuideMapObject.title:type_name -> tolo.guest.v1.GuideMapObject.TitleEntry
+	41, // 18: tolo.guest.v1.GuideMapObject.description:type_name -> tolo.guest.v1.GuideMapObject.DescriptionEntry
+	26, // 19: tolo.guest.v1.GuideMapObject.place:type_name -> tolo.guest.v1.GuideMapPlace
+	28, // 20: tolo.guest.v1.GuideMapObject.line:type_name -> tolo.guest.v1.GuideMapLine
+	29, // 21: tolo.guest.v1.GuideMapObject.area:type_name -> tolo.guest.v1.GuideMapArea
+	30, // 22: tolo.guest.v1.GuideMapObject.text:type_name -> tolo.guest.v1.GuideMapText
+	25, // 23: tolo.guest.v1.GuideMapPlace.center:type_name -> tolo.guest.v1.GuideMapPosition
+	2,  // 24: tolo.guest.v1.GuideMapPlace.shape:type_name -> tolo.guest.v1.GuideMapPlaceShape
+	27, // 25: tolo.guest.v1.GuideMapPlace.connector:type_name -> tolo.guest.v1.GuideMapConnector
+	3,  // 26: tolo.guest.v1.GuideMapConnector.type:type_name -> tolo.guest.v1.GuideMapConnectorType
+	4,  // 27: tolo.guest.v1.GuideMapConnector.direction:type_name -> tolo.guest.v1.GuideMapConnectorDirection
+	25, // 28: tolo.guest.v1.GuideMapLine.points:type_name -> tolo.guest.v1.GuideMapPosition
+	25, // 29: tolo.guest.v1.GuideMapArea.points:type_name -> tolo.guest.v1.GuideMapPosition
+	25, // 30: tolo.guest.v1.GuideMapText.position:type_name -> tolo.guest.v1.GuideMapPosition
+	34, // 31: tolo.guest.v1.UpdateGuestSettingsRequest.page_compositions:type_name -> tolo.guest.v1.PageComposition
+	34, // 32: tolo.guest.v1.GuestSettings.page_compositions:type_name -> tolo.guest.v1.PageComposition
+	0,  // 33: tolo.guest.v1.PageComposition.components:type_name -> tolo.guest.v1.GuestComponent
+	37, // 34: tolo.guest.v1.ListIssuedUrlsResponse.issued_urls:type_name -> tolo.guest.v1.IssuedUrl
+	5,  // 35: tolo.guest.v1.GuestPageService.OpenGuestPage:input_type -> tolo.guest.v1.OpenGuestPageRequest
+	7,  // 36: tolo.guest.v1.GuestPageService.GetCrowd:input_type -> tolo.guest.v1.GetCrowdRequest
+	10, // 37: tolo.guest.v1.GuestPageService.GetQueues:input_type -> tolo.guest.v1.GetQueuesRequest
+	14, // 38: tolo.guest.v1.GuestPageService.ListGuestMessages:input_type -> tolo.guest.v1.ListGuestMessagesRequest
+	17, // 39: tolo.guest.v1.GuestPageService.GetGuideMap:input_type -> tolo.guest.v1.GetGuideMapRequest
+	31, // 40: tolo.guest.v1.GuestSettingsService.GetGuestSettings:input_type -> tolo.guest.v1.GetGuestSettingsRequest
+	32, // 41: tolo.guest.v1.GuestSettingsService.UpdateGuestSettings:input_type -> tolo.guest.v1.UpdateGuestSettingsRequest
+	35, // 42: tolo.guest.v1.GuestSettingsService.ListIssuedUrls:input_type -> tolo.guest.v1.ListIssuedUrlsRequest
+	6,  // 43: tolo.guest.v1.GuestPageService.OpenGuestPage:output_type -> tolo.guest.v1.OpenGuestPageResponse
+	8,  // 44: tolo.guest.v1.GuestPageService.GetCrowd:output_type -> tolo.guest.v1.GetCrowdResponse
+	11, // 45: tolo.guest.v1.GuestPageService.GetQueues:output_type -> tolo.guest.v1.GetQueuesResponse
+	15, // 46: tolo.guest.v1.GuestPageService.ListGuestMessages:output_type -> tolo.guest.v1.ListGuestMessagesResponse
+	18, // 47: tolo.guest.v1.GuestPageService.GetGuideMap:output_type -> tolo.guest.v1.GetGuideMapResponse
+	33, // 48: tolo.guest.v1.GuestSettingsService.GetGuestSettings:output_type -> tolo.guest.v1.GuestSettings
+	33, // 49: tolo.guest.v1.GuestSettingsService.UpdateGuestSettings:output_type -> tolo.guest.v1.GuestSettings
+	36, // 50: tolo.guest.v1.GuestSettingsService.ListIssuedUrls:output_type -> tolo.guest.v1.ListIssuedUrlsResponse
+	43, // [43:51] is the sub-list for method output_type
+	35, // [35:43] is the sub-list for method input_type
+	35, // [35:35] is the sub-list for extension type_name
+	35, // [35:35] is the sub-list for extension extendee
+	0,  // [0:35] is the sub-list for field type_name
 }
 
 func init() { file_tolo_guest_v1_guest_proto_init() }
@@ -1365,13 +2597,20 @@ func file_tolo_guest_v1_guest_proto_init() {
 		(*Crowd_PointId)(nil),
 		(*Crowd_RouteId)(nil),
 	}
+	file_tolo_guest_v1_guest_proto_msgTypes[19].OneofWrappers = []any{
+		(*GuideMapObject_Place)(nil),
+		(*GuideMapObject_Line)(nil),
+		(*GuideMapObject_Area)(nil),
+		(*GuideMapObject_Text)(nil),
+	}
+	file_tolo_guest_v1_guest_proto_msgTypes[21].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_tolo_guest_v1_guest_proto_rawDesc), len(file_tolo_guest_v1_guest_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   19,
+			NumEnums:      5,
+			NumMessages:   37,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

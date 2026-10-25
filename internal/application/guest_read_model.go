@@ -31,6 +31,10 @@ type QrLocationSource interface {
 	GetQrLocations(ctx context.Context, tenantPublicID, eventID, revisionID string) (domain.QrLocations, bool, error)
 }
 
+type GuideMapSource interface {
+	GetGuideMap(ctx context.Context, tenantPublicID, eventID, revisionID string) (*domain.GuideMap, bool, error)
+}
+
 const (
 	displayNameRequestBuffer = 64
 	displayNameRefreshPause  = time.Minute
@@ -43,6 +47,7 @@ type GuestReadModelService struct {
 	messages     GuestMessageSource
 	displayNames DisplayNameSource
 	qrLocations  QrLocationSource
+	guideMaps    GuideMapSource
 	qrAccesses   repository.QrAccessRepository
 	qrOpens      *QrOpenLimiter
 	unknownNames chan string
@@ -55,6 +60,7 @@ func NewGuestReadModelService(
 	messages GuestMessageSource,
 	displayNames DisplayNameSource,
 	qrLocations QrLocationSource,
+	guideMaps GuideMapSource,
 	qrAccesses repository.QrAccessRepository,
 	qrOpens *QrOpenLimiter,
 ) *GuestReadModelService {
@@ -65,6 +71,7 @@ func NewGuestReadModelService(
 		messages:     messages,
 		displayNames: displayNames,
 		qrLocations:  qrLocations,
+		guideMaps:    guideMaps,
 		qrAccesses:   qrAccesses,
 		qrOpens:      qrOpens,
 		unknownNames: make(chan string, displayNameRequestBuffer),
@@ -131,6 +138,10 @@ func (s *GuestReadModelService) Reconcile(ctx context.Context) error {
 
 		if err := s.reconcileQrLocations(ctx, tenant, revisions[tenant.EventID]); err != nil {
 			errs = append(errs, fmt.Errorf("reconcile QR locations of event %s: %w", tenant.EventID, err))
+		}
+
+		if err := s.reconcileGuideMap(ctx, tenant, revisions[tenant.EventID]); err != nil {
+			errs = append(errs, fmt.Errorf("reconcile guide map of event %s: %w", tenant.EventID, err))
 		}
 	}
 
@@ -222,6 +233,39 @@ func (s *GuestReadModelService) reconcileQrLocations(ctx context.Context, tenant
 	}
 
 	return s.readModel.SaveQrLocations(ctx, locations)
+}
+
+func (s *GuestReadModelService) reconcileGuideMap(ctx context.Context, tenant domain.EventTenant, revisionID string) error {
+	if revisionID == "" {
+		return nil
+	}
+
+	current, err := s.readModel.FindGuideMap(ctx, tenant.EventID)
+	if err == nil && current.RevisionID == revisionID {
+		return nil
+	}
+
+	if err != nil && !errors.Is(err, repository.ErrGuideMapNotFound) {
+		return err
+	}
+
+	guideMap, found, err := s.guideMaps.GetGuideMap(ctx, tenant.TenantPublicID, tenant.EventID, revisionID)
+	if err != nil {
+		return err
+	}
+
+	if !found {
+		slog.WarnContext(ctx, "guide map of the published revision is not found, keeping the previous one",
+			"event_id", tenant.EventID, "revision_id", revisionID)
+
+		return nil
+	}
+
+	if guideMap == nil {
+		return s.readModel.DeleteGuideMap(ctx, tenant.EventID)
+	}
+
+	return s.readModel.SaveGuideMap(ctx, *guideMap)
 }
 
 func (s *GuestReadModelService) reconcileStatus(ctx context.Context, eventID string) error {

@@ -17,6 +17,7 @@ type qrLocationDocument struct {
 	QrLocationID string `json:"qr_location_id"`
 	Name         string `json:"name"`
 	Kind         string `json:"kind"`
+	PointID      string `json:"point_id,omitempty"`
 }
 
 type qrLocationsRow struct {

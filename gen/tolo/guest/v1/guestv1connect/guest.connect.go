@@ -36,6 +36,9 @@ const (
 	// GuestPageServiceListGuestMessagesProcedure is the procedure name of the GuestPageService's
 	// ListGuestMessages RPC.
 	GuestPageServiceListGuestMessagesProcedure = "/tolo.guest.v1.GuestPageService/ListGuestMessages"
+	// GuestPageServiceGetGuideMapProcedure is the procedure name of the GuestPageService's GetGuideMap
+	// RPC.
+	GuestPageServiceGetGuideMapProcedure = "/tolo.guest.v1.GuestPageService/GetGuideMap"
 	// GuestSettingsServiceGetGuestSettingsProcedure is the procedure name of the GuestSettingsService's
 	// GetGuestSettings RPC.
 	GuestSettingsServiceGetGuestSettingsProcedure = "/tolo.guest.v1.GuestSettingsService/GetGuestSettings"
@@ -76,6 +79,13 @@ var (
 			Procedure:  GuestPageServiceListGuestMessagesProcedure,
 		}
 	})
+	guestPageServiceGetGuideMapSpec = sync.OnceValue(func() connect.Spec {
+		return connect.Spec{
+			StreamType: connect.StreamTypeUnary,
+			Schema:     v1.File_tolo_guest_v1_guest_proto.Services().ByName("GuestPageService").Methods().ByName("GetGuideMap"),
+			Procedure:  GuestPageServiceGetGuideMapProcedure,
+		}
+	})
 )
 
 // GuestPageServiceClient is a client for the tolo.guest.v1.GuestPageService service.
@@ -84,6 +94,7 @@ type GuestPageServiceClient interface {
 	GetCrowd(context.Context, *v1.GetCrowdRequest) (*v1.GetCrowdResponse, error)
 	GetQueues(context.Context, *v1.GetQueuesRequest) (*v1.GetQueuesResponse, error)
 	ListGuestMessages(context.Context, *v1.ListGuestMessagesRequest) (*v1.ListGuestMessagesResponse, error)
+	GetGuideMap(context.Context, *v1.GetGuideMapRequest) (*v1.GetGuideMapResponse, error)
 }
 
 // NewGuestPageServiceClient constructs a client for the tolo.guest.v1.GuestPageService service.
@@ -98,6 +109,7 @@ type GuestPageServiceHandler interface {
 	GetCrowd(context.Context, *v1.GetCrowdRequest) (*v1.GetCrowdResponse, error)
 	GetQueues(context.Context, *v1.GetQueuesRequest) (*v1.GetQueuesResponse, error)
 	ListGuestMessages(context.Context, *v1.ListGuestMessagesRequest) (*v1.ListGuestMessagesResponse, error)
+	GetGuideMap(context.Context, *v1.GetGuideMapRequest) (*v1.GetGuideMapResponse, error)
 }
 
 // RegisterGuestPageServiceHandler registers svc as the tolo.guest.v1.GuestPageService
@@ -109,6 +121,7 @@ func RegisterGuestPageServiceHandler(server *connect.Server, svc GuestPageServic
 		connect.Method{Spec: guestPageServiceGetCrowdSpec(), Handler: adapter.getCrowd},
 		connect.Method{Spec: guestPageServiceGetQueuesSpec(), Handler: adapter.getQueues},
 		connect.Method{Spec: guestPageServiceListGuestMessagesSpec(), Handler: adapter.listGuestMessages},
+		connect.Method{Spec: guestPageServiceGetGuideMapSpec(), Handler: adapter.getGuideMap},
 	)
 }
 
@@ -129,6 +142,10 @@ func (UnimplementedGuestPageServiceHandler) GetQueues(context.Context, *v1.GetQu
 
 func (UnimplementedGuestPageServiceHandler) ListGuestMessages(context.Context, *v1.ListGuestMessagesRequest) (*v1.ListGuestMessagesResponse, error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, "tolo.guest.v1.GuestPageService.ListGuestMessages is not implemented")
+}
+
+func (UnimplementedGuestPageServiceHandler) GetGuideMap(context.Context, *v1.GetGuideMapRequest) (*v1.GetGuideMapResponse, error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, "tolo.guest.v1.GuestPageService.GetGuideMap is not implemented")
 }
 
 type guestPageServiceClient struct {
@@ -162,6 +179,14 @@ func (c *guestPageServiceClient) GetQueues(ctx context.Context, req *v1.GetQueue
 func (c *guestPageServiceClient) ListGuestMessages(ctx context.Context, req *v1.ListGuestMessagesRequest) (*v1.ListGuestMessagesResponse, error) {
 	var res v1.ListGuestMessagesResponse
 	if err := c.client.CallUnary(ctx, guestPageServiceListGuestMessagesSpec(), req, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+func (c *guestPageServiceClient) GetGuideMap(ctx context.Context, req *v1.GetGuideMapRequest) (*v1.GetGuideMapResponse, error) {
+	var res v1.GetGuideMapResponse
+	if err := c.client.CallUnary(ctx, guestPageServiceGetGuideMapSpec(), req, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -211,6 +236,18 @@ func (h guestPageServiceHandler) listGuestMessages(ctx context.Context, _ connec
 		return err
 	}
 	res, err := h.svc.ListGuestMessages(ctx, &req)
+	if err != nil {
+		return err
+	}
+	return stream.Send(res)
+}
+
+func (h guestPageServiceHandler) getGuideMap(ctx context.Context, _ connect.Spec, stream connect.ServerStream) error {
+	var req v1.GetGuideMapRequest
+	if err := stream.Receive(&req); err != nil {
+		return err
+	}
+	res, err := h.svc.GetGuideMap(ctx, &req)
 	if err != nil {
 		return err
 	}

@@ -20,6 +20,7 @@ type readModelMocks struct {
 	messages  *MockGuestMessageSource
 	names     *MockDisplayNameSource
 	qr        *MockQrLocationSource
+	guideMaps *MockGuideMapSource
 	accesses  *MockQrAccessRepository
 	now       *time.Time
 }
@@ -35,12 +36,13 @@ func newGuestReadModelService(t *testing.T) (*application.GuestReadModelService,
 		messages:  NewMockGuestMessageSource(ctrl),
 		names:     NewMockDisplayNameSource(ctrl),
 		qr:        NewMockQrLocationSource(ctrl),
+		guideMaps: NewMockGuideMapSource(ctrl),
 		accesses:  NewMockQrAccessRepository(ctrl),
 		now:       new(time.Date(2026, 10, 23, 9, 0, 0, 0, time.UTC)),
 	}
 
 	return application.NewGuestReadModelService(
-		mocks.readModel, mocks.settings, mocks.statuses, mocks.messages, mocks.names, mocks.qr, mocks.accesses,
+		mocks.readModel, mocks.settings, mocks.statuses, mocks.messages, mocks.names, mocks.qr, mocks.guideMaps, mocks.accesses,
 		application.NewQrOpenLimiter(func() time.Time { return *mocks.now }),
 	), mocks
 }
@@ -113,6 +115,11 @@ func TestReconcile(t *testing.T) {
 		mocks.qr.EXPECT().GetQrLocations(gomock.Any(), testTenantPublicID, testEventPublicID, "rev-1").Return(locations, true, nil)
 		mocks.readModel.EXPECT().SaveQrLocations(gomock.Any(), locations).Return(nil)
 
+		guideMap := domain.GuideMap{EventID: testEventPublicID, RevisionID: "rev-1", EncodedLayout: []byte{}, Points: nil, Groups: nil}
+		mocks.readModel.EXPECT().FindGuideMap(gomock.Any(), testEventPublicID).Return(domain.GuideMap{}, repository.ErrGuideMapNotFound)
+		mocks.guideMaps.EXPECT().GetGuideMap(gomock.Any(), testTenantPublicID, testEventPublicID, "rev-1").Return(&guideMap, true, nil)
+		mocks.readModel.EXPECT().SaveGuideMap(gomock.Any(), guideMap).Return(nil)
+
 		mocks.messages.EXPECT().ListGuestMessages(gomock.Any(), testTenantPublicID, testEventPublicID).Return(messages, nil)
 		mocks.readModel.EXPECT().ReplaceMessages(gomock.Any(), testEventPublicID, messages).Return(nil)
 
@@ -184,6 +191,8 @@ func TestReconcileQrLocations(t *testing.T) {
 		mocks.statuses.EXPECT().GetGuestSnapshot(gomock.Any(), testEventPublicID).Return(domain.GuestStatus{}, false, nil)
 		mocks.names.EXPECT().GetDisplayNames(gomock.Any(), testEventPublicID).Return(names, true, nil)
 		mocks.readModel.EXPECT().SaveDisplayNames(gomock.Any(), names).Return(nil)
+		mocks.readModel.EXPECT().FindGuideMap(gomock.Any(), testEventPublicID).
+			Return(domain.GuideMap{EventID: testEventPublicID, RevisionID: revisionID, EncodedLayout: []byte{}, Points: nil, Groups: nil}, nil).AnyTimes()
 
 		for _, tenant := range tenants {
 			mocks.messages.EXPECT().ListGuestMessages(gomock.Any(), tenant.TenantPublicID, tenant.EventID).Return(nil, nil)
@@ -265,6 +274,82 @@ func TestReconcileQrLocations(t *testing.T) {
 
 		if err := service.Reconcile(context.Background()); !errors.Is(err, unavailable) {
 			t.Errorf("Reconcile() error = %v, want %v", err, unavailable)
+		}
+	})
+}
+
+func TestReconcileGuideMap(t *testing.T) {
+	t.Parallel()
+
+	stored := domain.GuideMap{EventID: testEventPublicID, RevisionID: "rev-1", EncodedLayout: []byte{1}, Points: nil, Groups: nil}
+	pulled := domain.GuideMap{EventID: testEventPublicID, RevisionID: "rev-2", EncodedLayout: []byte{2}, Points: nil, Groups: nil}
+
+	publishedAt := func(t *testing.T, revisionID string) (*application.GuestReadModelService, readModelMocks) {
+		t.Helper()
+
+		service, mocks := newGuestReadModelService(t)
+		names := domain.DisplayNames{EventID: testEventPublicID, RevisionID: revisionID, Points: nil, Routes: nil, RouteEndpoints: nil}
+
+		mocks.readModel.EXPECT().ListEventIDs(gomock.Any()).Return([]string{testEventPublicID}, nil)
+		mocks.settings.EXPECT().ListEventTenants(gomock.Any()).
+			Return([]domain.EventTenant{{EventID: testEventPublicID, TenantPublicID: testTenantPublicID}}, nil)
+		mocks.statuses.EXPECT().GetGuestSnapshot(gomock.Any(), testEventPublicID).Return(domain.GuestStatus{}, false, nil)
+		mocks.names.EXPECT().GetDisplayNames(gomock.Any(), testEventPublicID).Return(names, true, nil)
+		mocks.readModel.EXPECT().SaveDisplayNames(gomock.Any(), names).Return(nil)
+		mocks.messages.EXPECT().ListGuestMessages(gomock.Any(), testTenantPublicID, testEventPublicID).Return(nil, nil)
+		mocks.readModel.EXPECT().ReplaceMessages(gomock.Any(), testEventPublicID, nil).Return(nil)
+		mocks.readModel.EXPECT().FindQrLocations(gomock.Any(), testEventPublicID).
+			Return(domain.QrLocations{EventID: testEventPublicID, RevisionID: revisionID, Locations: nil}, nil)
+
+		return service, mocks
+	}
+
+	t.Run("pulls the guide map of the published revision when the revision changes", func(t *testing.T) {
+		t.Parallel()
+
+		service, mocks := publishedAt(t, "rev-2")
+		mocks.readModel.EXPECT().FindGuideMap(gomock.Any(), testEventPublicID).Return(stored, nil)
+		mocks.guideMaps.EXPECT().GetGuideMap(gomock.Any(), testTenantPublicID, testEventPublicID, "rev-2").Return(&pulled, true, nil)
+		mocks.readModel.EXPECT().SaveGuideMap(gomock.Any(), pulled).Return(nil)
+
+		if err := service.Reconcile(context.Background()); err != nil {
+			t.Errorf("Reconcile() error = %v", err)
+		}
+	})
+
+	t.Run("does not pull the guide map while the published revision stays the same", func(t *testing.T) {
+		t.Parallel()
+
+		service, mocks := publishedAt(t, "rev-1")
+		mocks.readModel.EXPECT().FindGuideMap(gomock.Any(), testEventPublicID).Return(stored, nil)
+
+		if err := service.Reconcile(context.Background()); err != nil {
+			t.Errorf("Reconcile() error = %v", err)
+		}
+	})
+
+	t.Run("drops the guide map when the published revision has no guide map layout", func(t *testing.T) {
+		t.Parallel()
+
+		service, mocks := publishedAt(t, "rev-2")
+		mocks.readModel.EXPECT().FindGuideMap(gomock.Any(), testEventPublicID).Return(stored, nil)
+		mocks.guideMaps.EXPECT().GetGuideMap(gomock.Any(), testTenantPublicID, testEventPublicID, "rev-2").Return(nil, true, nil)
+		mocks.readModel.EXPECT().DeleteGuideMap(gomock.Any(), testEventPublicID).Return(nil)
+
+		if err := service.Reconcile(context.Background()); err != nil {
+			t.Errorf("Reconcile() error = %v", err)
+		}
+	})
+
+	t.Run("keeps the previous guide map when the revision is no longer published", func(t *testing.T) {
+		t.Parallel()
+
+		service, mocks := publishedAt(t, "rev-2")
+		mocks.readModel.EXPECT().FindGuideMap(gomock.Any(), testEventPublicID).Return(stored, nil)
+		mocks.guideMaps.EXPECT().GetGuideMap(gomock.Any(), testTenantPublicID, testEventPublicID, "rev-2").Return(nil, false, nil)
+
+		if err := service.Reconcile(context.Background()); err != nil {
+			t.Errorf("Reconcile() error = %v", err)
 		}
 	})
 }

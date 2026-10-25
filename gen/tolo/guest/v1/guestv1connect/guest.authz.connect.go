@@ -12,6 +12,7 @@ var GuestPageServicePolicies = authz.Policies{
 	GuestPageServiceGetCrowdProcedure:          {Level: authz.LevelPublic},
 	GuestPageServiceGetQueuesProcedure:         {Level: authz.LevelPublic},
 	GuestPageServiceListGuestMessagesProcedure: {Level: authz.LevelPublic},
+	GuestPageServiceGetGuideMapProcedure:       {Level: authz.LevelPublic},
 }
 
 // GuestSettingsServicePolicies is the effective policy of every procedure of tolo.guest.v1.GuestSettingsService.

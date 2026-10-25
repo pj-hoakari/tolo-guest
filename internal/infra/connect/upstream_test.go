@@ -14,6 +14,7 @@ import (
 
 	graphv1 "github.com/pj-hoakari/tolo-graph-authoring/gen/tolo/graph/v1"
 	"github.com/pj-hoakari/tolo-graph-authoring/gen/tolo/graph/v1/graphv1connect"
+	kernelv1 "github.com/pj-hoakari/tolo-kernel-proto/gen/tolo/kernel/v1"
 	observationv1 "github.com/pj-hoakari/tolo-observation/gen/tolo/observation/v1"
 	"github.com/pj-hoakari/tolo-observation/gen/tolo/observation/v1/observationv1connect"
 	operationv1 "github.com/pj-hoakari/tolo-operation/gen/tolo/operation/v1"
@@ -351,8 +352,8 @@ func TestGraphAuthoringClient(t *testing.T) {
 		calls:      make(chan upstreamCall, 2),
 		qrRequests: make(chan *graphv1.GetQrLocationsRequest, 2),
 		qrLocations: []*graphv1.QrLocation{
-			{QrLocationId: "qr-east", Name: "東門", Kind: "entrance"},
-			{QrLocationId: "qr-hall", Name: "ホール前", Kind: "queue"},
+			{QrLocationId: "qr-east", Name: "東門", Kind: "entrance", Anchor: &kernelv1.GraphAnchor{Target: &kernelv1.GraphAnchor_PointId{PointId: "p1"}}},
+			{QrLocationId: "qr-hall", Name: "ホール前", Kind: "queue", Anchor: &kernelv1.GraphAnchor{Target: &kernelv1.GraphAnchor_RouteId{RouteId: "r1"}}},
 		},
 		names: &graphv1.GetDisplayNamesResponse{
 			RevisionId: "rev-1",
@@ -411,8 +412,8 @@ func TestGraphAuthoringClient(t *testing.T) {
 		EventID:    testEventPublicID,
 		RevisionID: "rev-1",
 		Locations: []domain.QrLocation{
-			{QrLocationID: "qr-east", Name: "東門", Kind: "entrance"},
-			{QrLocationID: "qr-hall", Name: "ホール前", Kind: "queue"},
+			{QrLocationID: "qr-east", Name: "東門", Kind: "entrance", PointID: "p1"},
+			{QrLocationID: "qr-hall", Name: "ホール前", Kind: "queue", PointID: ""},
 		},
 	}
 	if !reflect.DeepEqual(locations, wantLocations) {

@@ -8,6 +8,7 @@ import (
 	connectrpc "connectrpc.com/connect/v2"
 
 	"github.com/pj-hoakari/tolo-guest/internal/domain"
+	"github.com/pj-hoakari/tolo-guest/internal/repository"
 	"github.com/pj-hoakari/tolo-guest/internal/tenantctx"
 )
 
@@ -26,6 +27,7 @@ var clientErrors = []struct {
 	{domain.ErrComponentUnspecified, connectrpc.CodeInvalidArgument, "page composition component is unspecified"},
 	{domain.ErrComponentsRequired, connectrpc.CodeInvalidArgument, "page composition components are required"},
 	{domain.ErrDuplicateComponent, connectrpc.CodeInvalidArgument, "page composition component is duplicated"},
+	{repository.ErrGuideMapNotFound, connectrpc.CodeNotFound, "guide map not found"},
 	{tenantctx.ErrMissing, connectrpc.CodePermissionDenied, "tenant ID is missing from the token"},
 	{tenantctx.ErrMismatch, connectrpc.CodePermissionDenied, "tenant ID does not match the token"},
 	{tenantctx.ErrEventMissing, connectrpc.CodePermissionDenied, "event ID is missing from the token"},

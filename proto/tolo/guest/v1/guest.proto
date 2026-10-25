@@ -18,6 +18,9 @@ service GuestPageService {
   rpc ListGuestMessages(ListGuestMessagesRequest) returns (ListGuestMessagesResponse) {
     option (authz.v1.auth_policy) = {level: AUTH_LEVEL_PUBLIC};
   }
+  rpc GetGuideMap(GetGuideMapRequest) returns (GetGuideMapResponse) {
+    option (authz.v1.auth_policy) = {level: AUTH_LEVEL_PUBLIC};
+  }
 }
 
 service GuestSettingsService {
@@ -126,6 +129,119 @@ message GuestMessage {
   string message_id = 1;
   string body = 2;
   google.protobuf.Timestamp sent_at = 3;
+}
+
+message GetGuideMapRequest {
+  string event_id = 1;
+  string qr_location_id = 2;
+}
+
+message GetGuideMapResponse {
+  GuideMapGraph graph = 1;
+  GuideMapLayout layout = 2;
+  string current_point_id = 3;
+}
+
+message GuideMapGraph {
+  repeated GuideMapPointLabels points = 1;
+  repeated GuideMapGroupLabels groups = 2;
+}
+
+message GuideMapPointLabels {
+  string point_id = 1;
+  map<string, string> labels = 2;
+}
+
+message GuideMapGroupLabels {
+  string group_id = 1;
+  map<string, string> labels = 2;
+}
+
+message GuideMapLayout {
+  repeated GuideMapGroup groups = 1;
+  repeated GuideMapObject objects = 2;
+  double north = 3;
+  double scale = 4;
+  string start_object_id = 5;
+}
+
+message GuideMapGroup {
+  string group_id = 1;
+}
+
+message GuideMapObject {
+  string object_id = 1;
+  string group_id = 2;
+  map<string, string> title = 3;
+  map<string, string> description = 4;
+  string color = 5;
+  bool closed = 6;
+  string point_id = 7;
+  string route_id = 8;
+  oneof kind {
+    GuideMapPlace place = 9;
+    GuideMapLine line = 10;
+    GuideMapArea area = 11;
+    GuideMapText text = 12;
+  }
+}
+
+message GuideMapPosition {
+  double x = 1;
+  double y = 2;
+}
+
+message GuideMapPlace {
+  GuideMapPosition center = 1;
+  GuideMapPlaceShape shape = 2;
+  double width = 3;
+  double height = 4;
+  bool pin = 5;
+  GuideMapConnector connector = 6;
+  optional double mark_width = 7;
+  optional double mark_height = 8;
+}
+
+enum GuideMapPlaceShape {
+  GUIDE_MAP_PLACE_SHAPE_UNSPECIFIED = 0;
+  GUIDE_MAP_PLACE_SHAPE_PIN = 1;
+  GUIDE_MAP_PLACE_SHAPE_RECT = 2;
+  GUIDE_MAP_PLACE_SHAPE_CIRCLE = 3;
+}
+
+message GuideMapConnector {
+  GuideMapConnectorType type = 1;
+  string link = 2;
+  GuideMapConnectorDirection direction = 3;
+}
+
+enum GuideMapConnectorType {
+  GUIDE_MAP_CONNECTOR_TYPE_UNSPECIFIED = 0;
+  GUIDE_MAP_CONNECTOR_TYPE_STAIRS = 1;
+  GUIDE_MAP_CONNECTOR_TYPE_ESCALATOR = 2;
+  GUIDE_MAP_CONNECTOR_TYPE_ELEVATOR = 3;
+}
+
+enum GuideMapConnectorDirection {
+  GUIDE_MAP_CONNECTOR_DIRECTION_UNSPECIFIED = 0;
+  GUIDE_MAP_CONNECTOR_DIRECTION_BOTH = 1;
+  GUIDE_MAP_CONNECTOR_DIRECTION_UP = 2;
+  GUIDE_MAP_CONNECTOR_DIRECTION_DOWN = 3;
+}
+
+message GuideMapLine {
+  repeated GuideMapPosition points = 1;
+  double width = 2;
+  bool dash = 3;
+}
+
+message GuideMapArea {
+  repeated GuideMapPosition points = 1;
+}
+
+message GuideMapText {
+  GuideMapPosition position = 1;
+  double size = 2;
 }
 
 message GetGuestSettingsRequest {
