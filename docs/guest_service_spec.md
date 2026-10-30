@@ -34,7 +34,7 @@ URL（設置箇所×種類）がページ構成（コンポーネントの組み
 
 天候のコンポーネント API は後回しにし、入出力はまだ定義しない（`GuestComponent` に天候を含めない）
 
-設置箇所の正本はグラフ編集（QrLocation。管理 UI がグラフと同じ画面で管理）
+設置箇所の所有はグラフ編集（QrLocation。管理 UI がグラフと同じ画面で管理）
 本サービスは GetQrLocations で pull した QR 設置箇所ごとに、発行 URL を1つ生成する。パスは `/event/{event_id}/guest/{qr_location_id}` とする
 種類は QR 設置箇所の属性（QrLocation の `kind` は1つ）であるため、設置箇所×種類の発行 URL は設置箇所ごとに1つになる。種類→ページ構成の対応は本サービスのイベント設定として保持し、`GuestSettingsService` で読み書きする
 QR の動的化（時間で変わる偽造対策。RotatingQrRefreshed）は将来導入とし、当面は固定 URL
@@ -56,7 +56,7 @@ QR の動的化（時間で変わる偽造対策。RotatingQrRefreshed）は将�
 | Observation | GetGuestSnapshot | 復旧・突き合わせ（起動時・push 欠落検知時のみ。通常経路では呼ばない） |
 | Operation | ListStaffMessages（audience=GUEST） | 復旧・突き合わせ（同上）。イベントの属するテナントを `tenant_id` に入れて送る |
 | Graph Authoring | GetDisplayNames | ポイント・ルート表示名と、現在の公開版の `revision_id` の取得（起動時と周期、未知 ID 検知時）。表示の組み立てと、GetQrLocations に渡す版の決定に使用 |
-| Graph Authoring | GetQrLocations | QR 設置箇所（名称・種類・グラフ要素参照）の取得。発行 URL（設置箇所×種類）の生成に使用（設置箇所の正本はグラフ編集）。`revision_id` には GetDisplayNames の応答の `revision_id` を入れ、イベントの属するテナントを `tenant_id` に入れて送る |
+| Graph Authoring | GetQrLocations | QR 設置箇所（名称・種類・グラフ要素参照）の取得。発行 URL（設置箇所×種類）の生成に使用（設置箇所の所有はグラフ編集）。`revision_id` には GetDisplayNames の応答の `revision_id` を入れ、イベントの属するテナントを `tenant_id` に入れて送る |
 | Graph Authoring | GetGuideMapLayout | 案内マップレイアウトと、それが参照するポイントとグループのラベルの取得。GetGuideMap の読み取りモデルに使用。GetQrLocations と同じく、GetDisplayNames の応答の `revision_id` が変わったときに取り直し、イベントの属するテナントを `tenant_id` に入れて送る |
 | 外部天気 API | （HTTP、順応者） | 周期取得して自 DB に保持（アクセスの都度は取得しない）。取得に使うイベント所在地は本サービスの設定として保持 |
 
@@ -88,9 +88,9 @@ push は HTTP の受け口で受ける。受け口の形と応答の規約は se
   ラベルは言語コード別のまま返し、表示言語の選択はゲスト用ページが行う。1回だけ取得した内容のまま、ページの中で表示言語を切り替えられるようにするため
   案内マップレイアウトは案内マップエディタで作るゲスト向けの地図の描画情報である。部品（場所・エリア・線・文字。場所のうち階段・エスカレーター・エレベーターは階移動手段）が `point_id`・`route_id`・`group_id` でグラフを参照し、面はグラフのグループとする
   現在地は、`qr_location_id` の QR 設置箇所の配置位置がポイントを指し、そのポイントを案内マップレイアウトが参照しているときだけ返す。返さないときは、ゲスト用ページが案内マップレイアウトの既定の出発地から経路を始める（ADR-0111）
-  案内マップレイアウトの正本はグラフ編集で、グラフ版に含まれる。本サービスは GetGuideMapLayout で現在の版の分を取得して複製し、GetGuideMap は自 DB だけで応答する
+  案内マップレイアウトはグラフ編集が所有し、グラフ版に含まれる。本サービスは GetGuideMapLayout で現在の版の分を取得して複製し、GetGuideMap は自 DB だけで応答する
   現在の版に案内マップレイアウトがないイベントと、本サービスが知らないイベントへの GetGuideMap は `not_found` とする
-- 整合性: 正本はあくまで上流（状況＝観測、メッセージ＝Operation）で、本サービスの DB は読み取りモデル（複製）
+- 整合性: 所有はあくまで上流（状況＝観測、メッセージ＝Operation）で、本サービスの DB は読み取りモデル（複製）
 - 配信規約: at-least-once 前提で本サービスは冪等に処理する
   状況＝sequence の新旧判定で古いものを破棄、メッセージ＝message_id による upsert／取り下げ
   配信の再試行はブローカーに委譲（送信側の再試行は publish 失敗時のみ）
@@ -101,7 +101,7 @@ push は HTTP の受け口で受ける。受け口の形と応答の規約は se
 - ゲスト向け表示レベル（CrowdLevel）は観測の入力用 CongestionLevel とは別に定義（ゲストに露出する表示言語のため）
 - `QueueStatus` の数値は Line Control の案内ダイジェスト（`tolo.line.v1.QueueDigest`）と同形で、観測が機械的に写して push する（Line Control）
 - 表示名の付与とゲスト向け文言化は本サービスの責務
-  表示名の正本はグラフ編集（グラフ文書のノードラベル＝言語コード別／エッジの表示名）で、本サービスは GetDisplayNames で pull した複製を保持し、`gate_point_ids` から行列のラベルを導く。ポイントのラベルは言語コード別に供給され、表示言語の選択は本サービスが行う
+  表示名の所有はグラフ編集（グラフ文書のノードラベル＝言語コード別／エッジの表示名）で、本サービスは GetDisplayNames で pull した複製を保持し、`gate_point_ids` から行列のラベルを導く。ポイントのラベルは言語コード別に供給され、表示言語の選択は本サービスが行う
   ルート対象（CrowdStatus の route_id）の表示は、ルート表示名が未設定なら端点ポイント名から合成する（GetDisplayNames の `route_endpoints` を使用）
   表示名の取得契機（起動時・周期・未知 ID 検知時）の詳細は実装フェーズで決定
 - QR 設置箇所は GetDisplayNames の応答の `revision_id`（現在の公開版）を指定して GetQrLocations で取得する
