@@ -65,13 +65,13 @@ QR の動的化（時間で変わる偽造対策。RotatingQrRefreshed）は将�
 `GuestPageService` と `GuestSettingsService` の proto は、tolo-guest リポジトリの `proto/tolo/guest/v1/guest.proto` を正とし、本文書には写さない
 購読するトピックのペイロードは publish する側の package が定義し（ADR-0106）、本サービスは publish する側の Go モジュールを import して復号する
 
-| トピック | 受け口 | ペイロード | 定義 |
+| トピック | 受信エンドポイント | ペイロード | 定義 |
 |---|---|---|---|
 | `guest-status` | `POST /push/guest-status` | `tolo.observation.v1.GuestStatus` | Observation |
 | `guest-messages` | `POST /push/guest-messages` | `tolo.operation.v1.GuestMessagesUpdate` | Operation |
 
-push は HTTP の受け口で受ける。受け口の形と応答の規約は service_transport.md の「情報更新 push の受け口」に従う
-本サービスの受け口が恒久的な失敗として扱うのは、ペイロードを復号できない場合だけである。設定を保存していないイベントへの push も、ほかのイベントと同じく読み取りモデルに反映する
+push は HTTP の受信エンドポイントで受ける。受信エンドポイントの形と応答の規約は service_transport.md の「情報更新 push の受信エンドポイント」に従う
+本サービスの受信エンドポイントが恒久的な失敗として扱うのは、ペイロードを復号できない場合だけである。設定を保存していないイベントへの push も、ほかのイベントと同じく読み取りモデルに反映する
 
 ## 補足
 
