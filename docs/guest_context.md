@@ -28,9 +28,9 @@
 | 行列状況・混雑（並び先案内含む） | 観測が publish（`guest-status`。PubSub 経由）。復旧時のみ GetGuestSnapshot を pull（観測コンテキスト） |
 | ゲスト向けスタッフメッセージ（誘導情報の唯一の伝達経路） | Operation が publish（`guest-messages`。PubSub 経由）。復旧時のみ ListStaffMessages を pull（スタッフ間コミュニケーションコンテキスト） |
 | 誘導提案 | 届かない（提案はスタッフ向け。スタッフが手動でメッセージ化） |
-| 表示名（ポイント・ルート） | グラフ編集から pull（GetDisplayNames）して複製を保持。正本はグラフ編集（グラフ編集コンテキスト） |
-| 案内マップ（グラフと案内マップレイアウト） | GetGuideMap で、案内マップレイアウトが参照するポイントとグループの ID とラベル、案内マップレイアウト、QR 設置箇所から決めた現在地を返す。グラフの正本はグラフ編集。案内マップレイアウトの正本もグラフ編集（グラフ版に含まれる）。GetGuideMapLayout で現在の版の分を pull して複製を保持 |
+| 表示名（ポイント・ルート） | グラフ編集から pull（GetDisplayNames）して複製を保持。所有はグラフ編集（グラフ編集コンテキスト） |
+| 案内マップ（グラフと案内マップレイアウト） | GetGuideMap で、案内マップレイアウトが参照するポイントとグループの ID とラベル、案内マップレイアウト、QR 設置箇所から決めた現在地を返す。グラフの所有はグラフ編集。案内マップレイアウトの所有もグラフ編集（グラフ版に含まれる）。GetGuideMapLayout で現在の版の分を pull して複製を保持 |
 | 混雑回避経路 | ゲスト用ページが GetCrowd の混雑状況から計算する案内。誘導提案は使わない |
-| QR 設置箇所 | グラフ編集から pull（GetQrLocations）して発行 URL（設置箇所×種類）を生成。正本はグラフ編集 |
+| QR 設置箇所 | グラフ編集から pull（GetQrLocations）して発行 URL（設置箇所×種類）を生成。所有はグラフ編集 |
 | 天候 | 外部天気 API（HTTP、順応者）。周期取得して自 DB に保持。イベント所在地は Guest Service の設定 |
 | QR 由来の人数計上 | Observation: ReportMeasurements（source=QR） |
