@@ -12,6 +12,11 @@ import (
 
 	observationv1 "github.com/pj-hoakari/tolo-observation/gen/tolo/observation/v1"
 	operationv1 "github.com/pj-hoakari/tolo-operation/gen/tolo/operation/v1"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -23,16 +28,19 @@ type fakeReadModel struct {
 	err      error
 	statuses []domain.GuestStatus
 	updates  []domain.GuestMessagesUpdate
+	spans    []trace.SpanContext
 }
 
-func (f *fakeReadModel) ApplyGuestStatus(_ context.Context, status domain.GuestStatus) error {
+func (f *fakeReadModel) ApplyGuestStatus(ctx context.Context, status domain.GuestStatus) error {
 	f.statuses = append(f.statuses, status)
+	f.spans = append(f.spans, trace.SpanContextFromContext(ctx))
 
 	return f.err
 }
 
-func (f *fakeReadModel) ApplyGuestMessages(_ context.Context, update domain.GuestMessagesUpdate) error {
+func (f *fakeReadModel) ApplyGuestMessages(ctx context.Context, update domain.GuestMessagesUpdate) error {
 	f.updates = append(f.updates, update)
+	f.spans = append(f.spans, trace.SpanContextFromContext(ctx))
 
 	return f.err
 }
@@ -194,6 +202,62 @@ func TestPushRejectsMethodsOtherThanPost(t *testing.T) {
 	for _, path := range []string{"/push/guest-status", "/push/guest-messages"} {
 		if got := push(t, &fakeReadModel{}, http.MethodGet, path, nil); got != http.StatusMethodNotAllowed {
 			t.Errorf("GET %s status = %d, want %d", path, got, http.StatusMethodNotAllowed)
+		}
+	}
+}
+
+func TestPushContinuesTheTraceFromTheTraceparentHeader(t *testing.T) {
+	recorder := tracetest.NewSpanRecorder()
+
+	otel.SetTracerProvider(sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(recorder)))
+	otel.SetTextMapPropagator(propagation.TraceContext{})
+
+	const (
+		traceID      = "4bf92f3577b34da6a3ce929d0e0e4736"
+		parentSpanID = "00f067aa0ba902b7"
+	)
+
+	bodies := map[string][]byte{
+		"/push/guest-status":   marshal(t, &observationv1.GuestStatus{EventId: "event-1", Sequence: 1}),
+		"/push/guest-messages": marshal(t, &operationv1.GuestMessagesUpdate{EventId: "event-1"}),
+	}
+
+	for path, body := range bodies {
+		readModel := &fakeReadModel{}
+
+		req := httptest.NewRequest(http.MethodPost, path, bytes.NewReader(body))
+		req.Header.Set("Traceparent", "00-"+traceID+"-"+parentSpanID+"-01")
+
+		rec := httptest.NewRecorder()
+		httpapi.NewHandler(httpapi.PushRoutes(readModel)).ServeHTTP(rec, req)
+
+		if !isSuccess(rec.Result().StatusCode) {
+			t.Fatalf("POST %s status = %d, want 2xx", path, rec.Result().StatusCode)
+		}
+
+		if len(readModel.spans) != 1 {
+			t.Fatalf("POST %s applied %d times, want 1", path, len(readModel.spans))
+		}
+
+		applied := readModel.spans[0]
+		if got := applied.TraceID().String(); got != traceID {
+			t.Errorf("POST %s applied with trace ID %s, want %s", path, got, traceID)
+		}
+
+		var server sdktrace.ReadOnlySpan
+
+		for _, span := range recorder.Ended() {
+			if span.SpanContext().Equal(applied) {
+				server = span
+			}
+		}
+
+		if server == nil {
+			t.Fatalf("POST %s applied outside a recorded span", path)
+		}
+
+		if got := server.Parent(); got.TraceID().String() != traceID || got.SpanID().String() != parentSpanID {
+			t.Errorf("POST %s span parent = %s/%s, want %s/%s", path, got.TraceID(), got.SpanID(), traceID, parentSpanID)
 		}
 	}
 }
