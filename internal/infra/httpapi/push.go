@@ -9,6 +9,7 @@ import (
 
 	observationv1 "github.com/pj-hoakari/tolo-observation/gen/tolo/observation/v1"
 	operationv1 "github.com/pj-hoakari/tolo-operation/gen/tolo/operation/v1"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/pj-hoakari/tolo-guest/internal/domain"
@@ -31,19 +32,23 @@ type pushPayload interface {
 
 func PushRoutes(readModel GuestReadModelApplier) Routes {
 	return func(mux *http.ServeMux) {
-		mux.HandleFunc("POST /push/guest-status", receivePush(
+		handle(mux, "POST /push/guest-status", receivePush(
 			func() *observationv1.GuestStatus { return new(observationv1.GuestStatus) },
 			func(ctx context.Context, status *observationv1.GuestStatus) error {
 				return readModel.ApplyGuestStatus(ctx, connectinfra.GuestStatus(status))
 			},
 		))
-		mux.HandleFunc("POST /push/guest-messages", receivePush(
+		handle(mux, "POST /push/guest-messages", receivePush(
 			func() *operationv1.GuestMessagesUpdate { return new(operationv1.GuestMessagesUpdate) },
 			func(ctx context.Context, update *operationv1.GuestMessagesUpdate) error {
 				return readModel.ApplyGuestMessages(ctx, connectinfra.GuestMessagesUpdate(update))
 			},
 		))
 	}
+}
+
+func handle(mux *http.ServeMux, pattern string, handler http.HandlerFunc) {
+	mux.Handle(pattern, otelhttp.NewHandler(handler, pattern))
 }
 
 func receivePush[P pushPayload](newPayload func() P, apply func(context.Context, P) error) http.HandlerFunc {
