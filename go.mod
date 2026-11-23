@@ -20,10 +20,10 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/pj-hoakari/internal-jwt-handling v0.5.1
 	github.com/pj-hoakari/protoc-gen-authz-go v0.4.2
-	github.com/pj-hoakari/tolo-graph-authoring v0.6.0
+	github.com/pj-hoakari/tolo-graph-authoring v0.6.2
 	github.com/pj-hoakari/tolo-kernel-proto v0.4.0
-	github.com/pj-hoakari/tolo-observation v0.9.0
-	github.com/pj-hoakari/tolo-operation v0.4.0
+	github.com/pj-hoakari/tolo-observation v0.9.2
+	github.com/pj-hoakari/tolo-operation v0.4.2
 	github.com/testcontainers/testcontainers-go v0.45.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.45.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0
@@ -94,7 +94,7 @@ require (
 	golang.org/x/sys v0.50.0 // indirect
 	golang.org/x/text v0.44.0 // indirect
 	golang.org/x/tools v0.52.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260928230214-8a89bd6388cc // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260928230214-8a89bd6388cc // indirect
-	google.golang.org/grpc v1.83.2 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20261012220534-4341edf3f941 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261012220534-4341edf3f941 // indirect
+	google.golang.org/grpc v1.84.0 // indirect
 )
